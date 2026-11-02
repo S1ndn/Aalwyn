@@ -24,6 +24,34 @@ function equation(tex: string) {
   return `{{${trace.name}(${trace.params.join(',')})=}}${body}`;
 }
 
+function stepCaption(step: TraceStep): string {
+  if (step.kind === 'simplify') return 'Done!';
+  if (step.kind === 'define') return `Define ${step.definition?.name ?? 'a value'}`;
+  if (step.kind === 'start') {
+    if (step.after.kind === 'symbol') return `Start at ${step.after.label ?? step.after.name}`;
+    if (step.after.kind === 'number') return `Start at ${step.after.value}`;
+    if (step.after.kind === 'aggregate') return step.after.operator === 'sum' ? 'Build the sum' : 'Build the product';
+    return 'Set the starting value';
+  }
+  if (step.kind === 'apply') {
+    const name = step.after.kind === 'function' ? step.after.name : undefined;
+    const labels: Record<string, string> = {
+      sin: 'Apply the sine function', cos: 'Apply the cosine function',
+      tan: 'Apply the tangent function', sqrt: 'Take the square root',
+      ln: 'Take the natural logarithm', exp: 'Apply the exponential function',
+      floor: 'Round down', ceil: 'Round up', abs: 'Take the absolute value',
+    };
+    return name && labels[name] ? labels[name] : 'Apply the transformation';
+  }
+  const instruction = step.source.trim().split('//')[0].trim();
+  const update = /^(\+=|-=|\*=|\/=|\^=)\s*(.+)$/.exec(instruction);
+  if (!update || update[2].includes('?') || update[2].length > 36) return 'Update the expression';
+  const [, operator, value] = update;
+  if (operator === '^=' && value === '2') return 'Square';
+  if (operator === '^=' && value === '3') return 'Cube';
+  return ({'+=': 'Add', '-=': 'Subtract', '*=': 'Multiply by', '/=': 'Divide by', '^=': 'Raise to'})[operator] + ' ' + value;
+}
+
 export default makeScene2D(function* (view) {
   view.fill('#141619');
   view.fontFamily('Segoe UI');
@@ -31,9 +59,7 @@ export default makeScene2D(function* (view) {
   const formula = createRef<Latex>();
   const activeLine = createRef<Rect>();
   const caption = createRef<Txt>();
-  const counter = createRef<Txt>();
   const detail = createRef<Latex>();
-  const progress = createRef<Rect>();
   const source = trace.source.trimEnd();
   const sourceLines = source.split('\n');
   const longest = Math.max(...sourceLines.map(line => line.length));
@@ -41,35 +67,26 @@ export default makeScene2D(function* (view) {
   const lineHeight = fontSize * 1.65;
   const codeY = -155;
   view.add(<>
-    <Txt text="How to code in Math" fontFamily="Segoe UI" fontWeight={600}
-      fontSize={70} fill={foreground} y={-440}/>
-    <Txt text="AALWYN  /  FOLLOW THE EXPRESSION" fontFamily="Segoe UI"
-      fontSize={22} letterSpacing={4} fill={accent} y={-365}/>
+    <Txt text="How it works" fontFamily="Segoe UI" fontWeight={500}
+      fontSize={56} fill={foreground} y={-410}/>
     <Rect x={-455} width={830} height={600} radius={20} fill="#1f1f1f" stroke="#33363d" lineWidth={2}/>
     <Rect x={455} width={830} height={600} radius={20} fill="#1b1e23" stroke="#33363d" lineWidth={2}/>
-    <Txt text="THE INSTRUCTIONS" x={-455} y={-250} fontSize={22} letterSpacing={3} fill={muted}/>
-    <Txt text="THE MATHEMATICS" x={455} y={-250} fontSize={22} letterSpacing={3} fill={muted}/>
+    <Txt text="The code" x={-455} y={-250} fontSize={26} fill={muted}/>
+    <Txt text="The math" x={455} y={-250} fontSize={26} fill={muted}/>
     <Rect ref={activeLine} x={-455} y={codeY + lineHeight / 2} width={770}
       height={lineHeight + 6} radius={7} fill="#264f784d" stroke="#4fc1ff55" lineWidth={1} opacity={0}/>
     <Code ref={code} x={-810} y={codeY} offset={[-1, -1]} code={source}
       fontFamily="Cascadia Code, Consolas, monospace" fontSize={fontSize}
       lineHeight={lineHeight} highlighter={aalwynHighlighter}/>
     <Latex ref={formula} x={455} y={-35} tex={equation('0')} fontSize={64} fill={foreground}/>
-    <Latex ref={detail} x={455} y={150} tex={trace.domainLatex || '\mathbb{R}'} fontSize={30} fill={muted}/>
-    <Txt ref={counter} text="COMPILER TRACE" x={455} y={245} fontSize={20} letterSpacing={2} fill={accent}/>
-    <Txt ref={caption} text="Start with a value. Build an expression." y={385}
+    <Latex ref={detail} x={455} y={150} tex={trace.domainLatex || String.raw`\mathbb{R}`} fontSize={30} fill={muted}/>
+    <Txt ref={caption} text="" y={395}
       fontFamily="Segoe UI" fontSize={34} fill={foreground}/>
-    <Rect x={0} y={455} width={1600} height={4} radius={2} fill="#33363d"/>
-    <Rect ref={progress} x={-800} y={455} offsetX={-1} width={0} height={4} radius={2} fill={accent}/>
-    <Txt text="aalwyn" x={-800} y={495} fontFamily="Segoe UI" fontWeight={600} fontSize={23} fill={muted}/>
-    <Txt text="One instruction. One transformation." x={610} y={495}
-      fontFamily="Segoe UI" fontSize={21} fill={muted}/>
   </>);
   yield* waitFor(0.8);
-  for (const [index, step] of steps.entries()) {
+  for (const step of steps) {
     const isFinal = step.kind === 'simplify';
-    caption().text(step.title);
-    counter().text(`STEP ${index + 1} / ${steps.length}`);
+    caption().text(stepCaption(step));
     if (isFinal) {
       yield* all(activeLine().opacity(0, 0.3), code().selection(lines(0, sourceLines.length - 1), 0.3));
     } else {
@@ -81,14 +98,11 @@ export default makeScene2D(function* (view) {
         code().selection(lines(step.line - 1, step.endLine - 1), 0.3),
       );
     }
-    yield* all(
-      formula().tex(equation(step.afterLatex), transition, easeInOutCubic),
-      progress().width(1600 * (index + 1) / steps.length, transition),
-    );
+    yield* formula().tex(equation(step.afterLatex), transition, easeInOutCubic);
     const defined = 'definition' in step ? step.definition : undefined;
-    yield* detail().tex(defined ? `\mathrm{${defined.name}}=${defined.latex}` : trace.domainLatex || '\mathbb{R}', 0.3);
+    yield* detail().tex(defined ? String.raw`\mathrm{${defined.name}}=${defined.latex}` : trace.domainLatex || String.raw`\mathbb{R}`, 0.3);
     yield* waitFor(hold);
   }
-  caption().text('The finished expression, ready to use.');
+  caption().text('Done!');
   yield* waitFor(2.4);
 });
