@@ -40,15 +40,15 @@ end
 Aalwyn turns this into the mathematical definitions
 
 $$
-\operatorname{weightedMean}(n)
-=\left(\prod_{k=1}^{n}k^{\operatorname{weight}(k)}\right)^{
-\frac{1}{\sum_{k=1}^{n}\operatorname{weight}(k)}}
+\mathrm{weightedMean}(n)
+=\left(\prod_{k=1}^{n}k^{\mathrm{weight}(k)}\right)^{
+\frac{1}{\sum_{k=1}^{n}\mathrm{weight}(k)}}
 \qquad (n\in\mathbb{Z},\ n\ge1),
 $$
 
 $$
-\operatorname{weight}(k)
-=2-\left\lfloor\frac{1}{1+|\operatorname{mod}(k,2)|}\right\rfloor
+\mathrm{weight}(k)
+=2-\left\lfloor\frac{1}{1+|\mathrm{mod}(k,2)|}\right\rfloor
 \qquad (k\in\mathbb{N}_0).
 $$
 
