@@ -285,6 +285,19 @@ console.log(result.latex);
 console.log(evaluateFunction(result, { x: 3 })); // 9
 ```
 
+## Video animations
+
+A separate [Motion Canvas workspace](video/README.md) animates Aalwyn code beside
+its evolving mathematical expression. Its steps are exported by the actual compiler.
+
+```sh
+npm run video:install
+npm run video
+```
+
+Open <http://127.0.0.1:9000/> to preview the starter scene and export an MP4.
+See the workspace guide for custom examples, timing, and rendering instructions.
+
 ## Deployment
 
 Pushes to `main` run the tests, build the site, and deploy it to GitHub Pages via

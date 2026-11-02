@@ -1,0 +1,5 @@
+fn f(real x) = x
+    += 3
+    ^= 2
+    >> sin
+end

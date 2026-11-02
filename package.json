@@ -7,7 +7,12 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
-    "compile": "tsx src/cli.ts"
+    "compile": "tsx src/cli.ts",
+    "trace": "tsx src/trace-cli.ts",
+    "video:trace": "tsx src/trace-cli.ts video/examples/intro.aal --out video/src/trace.json",
+    "video:install": "npm ci --prefix video",
+    "video": "npm run video:trace && npm --prefix video start",
+    "video:build": "npm run video:trace && npm --prefix video run build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

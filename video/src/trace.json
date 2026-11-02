@@ -1,0 +1,215 @@
+{
+  "version": 1,
+  "source": "fn f(real x) = x\n    += 3\n    ^= 2\n    >> sin\nend\n",
+  "name": "f",
+  "params": [
+    "x"
+  ],
+  "domainLatex": "x \\in \\mathbb{R}",
+  "auxiliaryExports": [],
+  "steps": [
+    {
+      "kind": "start",
+      "line": 1,
+      "endLine": 1,
+      "source": "fn f(real x) = x",
+      "title": "Set the starting value",
+      "before": {
+        "kind": "number",
+        "value": "0"
+      },
+      "after": {
+        "kind": "symbol",
+        "name": "x"
+      },
+      "beforeLatex": "0",
+      "afterLatex": "x"
+    },
+    {
+      "kind": "update",
+      "line": 2,
+      "endLine": 2,
+      "source": "    += 3",
+      "title": "Add to the expression",
+      "before": {
+        "kind": "symbol",
+        "name": "x"
+      },
+      "after": {
+        "kind": "add",
+        "terms": [
+          {
+            "kind": "symbol",
+            "name": "x"
+          },
+          {
+            "kind": "number",
+            "value": "3"
+          }
+        ]
+      },
+      "beforeLatex": "x",
+      "afterLatex": "x + 3"
+    },
+    {
+      "kind": "update",
+      "line": 3,
+      "endLine": 3,
+      "source": "    ^= 2",
+      "title": "Raise the expression to a power",
+      "before": {
+        "kind": "add",
+        "terms": [
+          {
+            "kind": "symbol",
+            "name": "x"
+          },
+          {
+            "kind": "number",
+            "value": "3"
+          }
+        ]
+      },
+      "after": {
+        "kind": "power",
+        "left": {
+          "kind": "add",
+          "terms": [
+            {
+              "kind": "symbol",
+              "name": "x"
+            },
+            {
+              "kind": "number",
+              "value": "3"
+            }
+          ]
+        },
+        "right": {
+          "kind": "number",
+          "value": "2"
+        }
+      },
+      "beforeLatex": "x + 3",
+      "afterLatex": "\\left(x + 3\\right)^{2}"
+    },
+    {
+      "kind": "apply",
+      "line": 4,
+      "endLine": 4,
+      "source": "    >> sin",
+      "title": "Apply a transformation",
+      "before": {
+        "kind": "power",
+        "left": {
+          "kind": "add",
+          "terms": [
+            {
+              "kind": "symbol",
+              "name": "x"
+            },
+            {
+              "kind": "number",
+              "value": "3"
+            }
+          ]
+        },
+        "right": {
+          "kind": "number",
+          "value": "2"
+        }
+      },
+      "after": {
+        "kind": "function",
+        "name": "sin",
+        "args": [
+          {
+            "kind": "power",
+            "left": {
+              "kind": "add",
+              "terms": [
+                {
+                  "kind": "symbol",
+                  "name": "x"
+                },
+                {
+                  "kind": "number",
+                  "value": "3"
+                }
+              ]
+            },
+            "right": {
+              "kind": "number",
+              "value": "2"
+            }
+          }
+        ]
+      },
+      "beforeLatex": "\\left(x + 3\\right)^{2}",
+      "afterLatex": "\\sin\\left(\\left(x + 3\\right)^{2}\\right)"
+    },
+    {
+      "kind": "simplify",
+      "line": 1,
+      "endLine": 1,
+      "source": "",
+      "title": "Simplify the completed expression",
+      "before": {
+        "kind": "function",
+        "name": "sin",
+        "args": [
+          {
+            "kind": "power",
+            "left": {
+              "kind": "add",
+              "terms": [
+                {
+                  "kind": "symbol",
+                  "name": "x"
+                },
+                {
+                  "kind": "number",
+                  "value": "3"
+                }
+              ]
+            },
+            "right": {
+              "kind": "number",
+              "value": "2"
+            }
+          }
+        ]
+      },
+      "after": {
+        "kind": "function",
+        "name": "sin",
+        "args": [
+          {
+            "kind": "power",
+            "left": {
+              "kind": "add",
+              "terms": [
+                {
+                  "kind": "number",
+                  "value": "3"
+                },
+                {
+                  "kind": "symbol",
+                  "name": "x"
+                }
+              ]
+            },
+            "right": {
+              "kind": "number",
+              "value": "2"
+            }
+          }
+        ]
+      },
+      "beforeLatex": "\\sin\\left(\\left(x + 3\\right)^{2}\\right)",
+      "afterLatex": "\\sin\\left(\\left(3 + x\\right)^{2}\\right)"
+    }
+  ],
+  "finalLatex": "\\sin\\left(\\left(3 + x\\right)^{2}\\right)",
+  "latex": "\\begin{gathered}f\\left(x\\right) = \\sin\\left(\\left(3 + x\\right)^{2}\\right)\\\\ \\text{for } x \\in \\mathbb{R}\\end{gathered}"
+}

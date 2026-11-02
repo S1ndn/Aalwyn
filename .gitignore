@@ -1,3 +1,7 @@
 node_modules/
 dist/
 *.log
+
+# Motion Canvas renders and editor state
+video/output/
+video/.vite/

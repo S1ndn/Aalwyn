@@ -1,0 +1,4 @@
+fn select(real x) = 0
+    += 1 ? (x == 0)
+    *= x + 2
+end
