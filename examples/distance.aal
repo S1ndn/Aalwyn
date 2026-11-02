@@ -1,7 +1,7 @@
+// Definitions can come before the starting assignment.
 fn distance(real ax, real ay, real bx, real by)
-    define dx (bx - ax)
-    define dy (by - ay)
-    += (dx ^ 2)
-    += (dy ^ 2)
-    >> sqrt(me)
+    define dx bx - ax
+    define dy by - ay
+    = dx^2 + dy^2
+    >> sqrt
 end

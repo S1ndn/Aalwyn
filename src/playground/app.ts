@@ -58,7 +58,7 @@ const graph = createGraph(graphHost),
   functionInput = createFunctionInput(element("function-input"));
 let storageFailed = false,
   recoveryWarning = "";
-const fallback = initialWorkspace(examples.Distance);
+const fallback = initialWorkspace(examples.Arithmetic);
 let workspace = fallback;
 try {
   const saved = localStorage.getItem(workspaceKey);

@@ -1,18 +1,14 @@
-// Each index builds one independent term. Bounds are inclusive integers.
-
-// conditional contribution inside each term
-
-fn squares(real a, real b)
-    += sum i from a to b (
-        += (i ^ 2)
+// Each iteration starts a fresh term. Bounds are inclusive integers.
+fn squares(int a, int b)
+    = sum i from a to b (
+        = i^2
         -= a ? (i < 2)
     )
 end
 
-fn productRange(real n)
-    += 1
-    *= prod i from 1 to n (
-        += 1
-        *= i
+// Set each factor directly; the product multiplies the completed terms.
+fn productRange(natural n)
+    = prod i from 1 to n (
+        = i
     )
 end

@@ -1,15 +1,14 @@
-// Both apply forms and postfix notation use the same builtin.
+// Factorial accepts nonnegative integers, including 0! = 1.
+fn applied(natural n) = n
+    >> factorial
+end
 
-fn applied(real n)
-    += n
+fn explicit(natural n) = n
     >> factorial(me)
 end
 
-fn explicit(real n)
-    += n
-    >> factorial(me)
+fn shifted(natural x, natural a) = (x + a)!
 end
 
-fn shifted(real x, real a) => factorial((x + a))
-
-fn fact(real n) => factorial(n)
+fn fact(natural n) = n!
+end
