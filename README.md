@@ -22,6 +22,21 @@ browser profile and origin. Compile explicitly with Ctrl/Cmd+Enter or Compile.
 npm run compile -- examples/distance.aal
 ```
 
+## GitHub Pages
+
+The public IDE is deployed at <https://s1ndn.github.io/Aalwyn/> once Pages is enabled.
+In the repository's **Settings > Pages**, select **GitHub Actions** as the source.
+Every push to `main` then runs the tests, builds the site, and deploys it through
+`.github/workflows/deploy.yml`. Deployments can also be started manually from
+GitHub's Actions tab.
+
+The workflow sets `AALWYN_BASE_PATH=/Aalwyn/` so scripts, styles, and math fonts
+load correctly beneath the repository URL. Local development keeps its normal
+root URL. To host under a different path or a custom domain, update that
+workflow value (`/` for a root domain).
+
+Documents are saved in each visitor's browser; they are not uploaded to GitHub.
+
 ## Declarations and blocks
 
 Every function declaration begins with `fn`:

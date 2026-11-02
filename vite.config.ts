@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  // Pages supplies its repository path; local development stays at /.
+  base: process.env.AALWYN_BASE_PATH ?? "/",
   build: {
     rollupOptions: {
       output: {
