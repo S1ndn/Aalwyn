@@ -66,6 +66,8 @@ export default makeScene2D(function* (view) {
   const fontSize = Math.min(34, 720 / (longest * 0.61), 420 / (sourceLines.length * 1.6));
   const lineHeight = fontSize * 1.65;
   const codeY = -155;
+  // Center the box on the visible glyphs rather than the line-height leading.
+  const highlightOffsetY = -fontSize * 0.24;
   view.add(<>
     <Txt text="How it works" fontFamily="Segoe UI" fontWeight={500}
       fontSize={56} fill={foreground} y={-410}/>
@@ -73,7 +75,7 @@ export default makeScene2D(function* (view) {
     <Rect x={455} width={830} height={600} radius={20} fill="#1b1e23" stroke="#33363d" lineWidth={2}/>
     <Txt text="The code" x={-455} y={-250} fontSize={26} fill={muted}/>
     <Txt text="The math" x={455} y={-250} fontSize={26} fill={muted}/>
-    <Rect ref={activeLine} x={-455} y={codeY + lineHeight / 2} width={770}
+    <Rect ref={activeLine} x={-455} y={codeY + lineHeight / 2 + highlightOffsetY} width={770}
       height={lineHeight + 6} radius={7} fill="#264f784d" stroke="#4fc1ff55" lineWidth={1} opacity={0}/>
     <Code ref={code} x={-810} y={codeY} offset={[-1, -1]} code={source}
       fontFamily="Cascadia Code, Consolas, monospace" fontSize={fontSize}
@@ -93,7 +95,7 @@ export default makeScene2D(function* (view) {
       const middle = (step.line - 1 + (step.endLine - step.line + 1) / 2) * lineHeight;
       yield* all(
         activeLine().opacity(1, 0.2),
-        activeLine().position([-455, codeY + middle], 0.4, easeInOutCubic),
+        activeLine().position([-455, codeY + middle + highlightOffsetY], 0.4, easeInOutCubic),
         activeLine().height((step.endLine - step.line + 1) * lineHeight + 6, 0.4),
         code().selection(lines(step.line - 1, step.endLine - 1), 0.3),
       );
