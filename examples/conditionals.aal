@@ -1,0 +1,12 @@
+fn positive(real x)
+    += (x ^ 2) ? (x > 0)
+end
+
+fn guarded(real x)
+    += 2
+    *= x ? (x > 0)
+end
+
+fn range(real x)
+    += x ? ((x > 0) and (x < 10))
+end

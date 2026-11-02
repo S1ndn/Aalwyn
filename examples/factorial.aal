@@ -1,0 +1,15 @@
+// Both apply forms and postfix notation use the same builtin.
+
+fn applied(real n)
+    += n
+    >> factorial(me)
+end
+
+fn explicit(real n)
+    += n
+    >> factorial(me)
+end
+
+fn shifted(real x, real a) => factorial((x + a))
+
+fn fact(real n) => factorial(n)

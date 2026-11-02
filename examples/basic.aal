@@ -1,0 +1,7 @@
+fn square(real x) => (x ^ 2)
+
+fn f(real x)
+    += 1
+    += x
+    *= 2
+end
