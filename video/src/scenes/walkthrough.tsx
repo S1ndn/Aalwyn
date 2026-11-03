@@ -185,6 +185,8 @@ return makeScene2D(function* (view) {
     code().selection(lines(0, sourceLines.length - 1), 0.25),
   );
   yield* waitFor(timing?.outro ?? 2.4);
+  yield* section().opacity(0, 0.9);
+  yield* waitFor(0.4);
 });
 
 }
