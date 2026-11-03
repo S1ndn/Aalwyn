@@ -1,17 +1,21 @@
-import {Code, Img, Latex, Node, Rect, Txt, lines, makeScene2D} from '@motion-canvas/2d';
+import {Code, Img, Latex, Node, Rect, Txt, lines, word, makeScene2D} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
 import {aalwynHighlighter} from '../highlighter';
 import defaultTrace from '../trace.json';
 import type {TraceStep} from '../../../src/compiler/trace';
+export interface Spotlight {
+  line: number; token: string; kind: string; mathSvg: string; mathSize: [number, number];
+}
 export interface WalkthroughData {
   name: string; params: string[]; source: string; domainLatex: string; finalLatex: string;
   steps: unknown[]; timing?: {line: number; intro: number; outro: number};
   showCaptions?: boolean; skipFormulaIntro?: boolean; tutorialTitle?: boolean; hideDomain?: boolean;
+  introMath?: {mathSvg: string; mathSize: number[]};
   introRules?: {expression: string; when: string}[];
 }
 
 export function createWalkthrough(trace: WalkthroughData) {
-const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]})[];
+const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]; spotlight?: Spotlight})[];
 const timing = (trace as unknown as {timing?: {line: number; intro: number; outro: number}}).timing;
 const showCaptions = (trace as unknown as {showCaptions?: boolean}).showCaptions !== false;
 let mathLabel = `${trace.name}(${trace.params.join(',')})`;
@@ -104,8 +108,9 @@ return makeScene2D(function* (view) {
   if (trace.tutorialTitle) yield* waitFor(0.4);
   if (!trace.skipFormulaIntro) {
   const finalStep = steps.at(-1)!;
-  const formulaIntro = finalStep.mathSvg
-    ? new Img({src: finalStep.mathSvg, size: finalStep.mathSize!, opacity: 0})
+  const openingMath = trace.introMath ?? finalStep;
+  const formulaIntro = openingMath.mathSvg
+    ? new Img({src: openingMath.mathSvg, size: openingMath.mathSize! as [number, number], opacity: 0})
     : new Latex({tex: equation(trace.finalLatex), fontSize: 64, fill: foreground, opacity: 0});
   const intro: Node = trace.introRules ? new Node({opacity: 0}) : formulaIntro;
   if (trace.introRules) {
@@ -144,6 +149,56 @@ return makeScene2D(function* (view) {
   code().selection(lines(0, 0));
   yield* all(displayedFormula.opacity(1, 0.45), detail().opacity(trace.hideDomain ? 0 : 1, 0.45), activeLine().opacity(1, 0.45));
   yield* waitFor(1);
+  function* showSpotlight(feature: Spotlight) {
+    const ranges: [[number, number], [number, number]][] = [];
+    const text = sourceLines[feature.line - 1];
+    let start = text.indexOf(feature.token);
+    while (start >= 0) {
+      ranges.push(word(feature.line - 1, start, feature.token.length));
+      start = text.indexOf(feature.token, start + feature.token.length);
+    }
+    const overlay = new Node({opacity: 0});
+    overlay.add(<>
+      <Rect width={1920} height={1080} fill="#141619" opacity={0.9}/>
+      <Code x={-810} y={codeY} offset={[-1, -1]} code={source}
+        fontFamily="Cascadia Code, Consolas, monospace" fontSize={fontSize}
+        lineHeight={lineHeight} highlighter={aalwynHighlighter} selection={ranges}/>
+    </>);
+    if (feature.kind === 'domain') {
+      overlay.add(<>
+        <Rect x={455} y={150} width={720} height={84} radius={10} fill="#141619" stroke={accent} lineWidth={2}/>
+        <Latex x={455} y={150} tex={String.raw`\text{for } ${trace.domainLatex}`}
+          fontSize={34} fill={accent}/>
+      </>);
+    } else if (feature.kind === 'conditional' || feature.kind === 'else') {
+      overlay.add(<Rect x={455} y={0} width={790} height={390} fill="#141619"/>);
+      if (feature.kind === 'conditional') {
+        overlay.add(<>
+          <Txt text="+= 3 ? condition" x={455} y={-100} fontSize={40}
+            fontFamily="Cascadia Code, Consolas, monospace" fill={accent}/>
+          <Txt text="true → add 3" x={455} y={5} fontSize={34} fill={foreground}/>
+          <Txt text="false → keep the current value" x={455} y={85} fontSize={29} fill={foreground}/>
+        </>);
+      } else {
+        overlay.add(<>
+          <Txt text="value ? condition else other value" x={455} y={-110} fontSize={28}
+            fontFamily="Cascadia Code, Consolas, monospace" fill={accent}/>
+          <Latex tex={String.raw`\text{true} \Rightarrow x^2`} x={455} y={0} fontSize={46} fill={foreground}/>
+          <Latex tex={String.raw`\text{false} \Rightarrow -x`} x={455} y={85} fontSize={46} fill={foreground}/>
+        </>);
+      }
+    } else {
+      overlay.add(<>
+        <Rect x={455} y={-35} width={790} height={330} fill="#141619"/>
+        <Img x={455} y={-35} src={feature.mathSvg} size={feature.mathSize}/>
+      </>);
+    }
+    section().add(overlay);
+    yield* overlay.opacity(1, 0.3);
+    yield* waitFor(feature.kind === 'conditional' || feature.kind === 'else' ? 3.5 : feature.kind === 'domain' ? 3 : 2.2);
+    yield* overlay.opacity(0, 0.3);
+    overlay.remove();
+  }
   for (const step of steps) {
     const isFinal = step.kind === 'simplify';
     caption().text(step.caption ?? stepCaption(step));
@@ -166,6 +221,7 @@ return makeScene2D(function* (view) {
       displayedFormula.remove();
       displayedFormula = nextFormula;
       yield* waitFor(timing.line - transition);
+      if (step.spotlight) yield* showSpotlight(step.spotlight);
       continue;
     }
     if (isFinal) {

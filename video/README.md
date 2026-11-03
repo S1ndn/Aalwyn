@@ -159,12 +159,19 @@ into numbered clips with matching source files. The splitter finds the blank
 background pauses and verifies that each exported clip starts and ends on a
 flat background. Files appear in `video/output/tutorial-clips/`.
 
-The tutorial series uses raw lowered LaTeX for every construction step, the
-opening expression, definition values, and the final frame. It does not run a
-presentation simplification/factorization step or reorder the finished expression.
-Both raw and simplified evaluator results are checked against the expected values.
+The tutorial series uses raw lowered LaTeX for construction steps, opening
+expressions, and definition values. A separate final step applies the compiler's
+simplifier before the completion border and bounce. Both raw and simplified
+evaluator results are checked against the expected values.
 
 Tutorial instructions now advance once per second. Conditional introductions
 show two separate expression/condition rows in ordinary language, rather than
 the expanded arithmetic encoding. The expanded raw formula still builds during
 the walkthrough. Conditional title cards hold for three seconds for reading.
+
+First-use spotlights pause the walkthrough and dim everything outside the active
+code token and its mathematical counterpart. They introduce starting assignment,
+addition, multiplication, powers, division, real/integer types, function calls,
+definitions, and both conditional forms. Type spotlights emphasize the matching
+“for …” domain. Conditional spotlights use concise true/false outcomes.
+The normal instruction pace remains one second per line outside these pauses.

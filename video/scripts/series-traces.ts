@@ -32,6 +32,36 @@ for (const [index, item] of manifest.entries()) {
     endLine: source.trimEnd().split('\n').length, source: 'end', title: 'Finish',
     before: last.after, beforeLatex: last.afterLatex, after: compiled.ir, afterLatex: rawLatex,
     ...renderedEquation(`${signature}=${rawLatex}`)});
+  const cleanedLatex = compiled.expressionLatex;
+  steps.push({...last, kind: 'simplify', line: source.trimEnd().split('\n').length,
+    endLine: source.trimEnd().split('\n').length, source: 'end', title: 'Simplify',
+    before: compiled.ir, beforeLatex: rawLatex, after: compiled.simplified, afterLatex: cleanedLatex,
+    ...renderedEquation(`${signature}=${cleanedLatex}`)});
+  const featureSets: {line: number; token: string; kind: string; target?: string}[][] = [
+    [{line: 1, token: '= x', kind: 'operation', target: 'x'},
+     {line: 2, token: '+=', kind: 'operation', target: '3'},
+     {line: 3, token: '*=', kind: 'operation', target: '2'}],
+    [{line: 2, token: '^=', kind: 'operation', target: '2'}],
+    [{line: 1, token: 'real', kind: 'domain'}, {line: 3, token: '/=', kind: 'operation', target: '2'}],
+    [{line: 1, token: 'int', kind: 'domain'}],
+    [{line: 4, token: '>> sin', kind: 'operation', target: String.fromCharCode(92) + 'sin'}],
+    [{line: 2, token: 'define shifted', kind: 'definition'}],
+    [{line: 2, token: '?', kind: 'conditional'}],
+    [{line: 2, token: 'else -x', kind: 'else'}],
+  ];
+  const spotlightSteps = steps.map(step => {
+    const feature = step.kind !== 'simplify' && featureSets[index].find(feature => feature.line === step.line);
+    if (!feature) return step;
+    let expression = `${signature}=${step.afterLatex}`;
+    if (feature.kind === 'definition' && step.definition)
+      expression = `${String.fromCharCode(92)}mathrm{${step.definition.name}}=${step.definition.latex}`;
+    if (feature.target) {
+      const at = expression.lastIndexOf(feature.target);
+      if (at < 0) throw new Error(`Missing math spotlight for ${item.slug}`);
+      expression = expression.slice(0, at) + `{${String.fromCharCode(92)}color{#4fc1ff}${feature.target}}` + expression.slice(at + feature.target.length);
+    }
+    return {...step, spotlight: {...feature, ...renderedEquation(expression)}};
+  });
   const [inputs, expected] = checks[index];
   if (Math.abs(evaluateFunction(compiled, inputs) - expected) > 1e-10 || Math.abs(evaluateMath(compiled.ir, inputs) - expected) > 1e-10) throw new Error(`Failed ${item.slug}`);
   if (index === 6 && evaluateFunction(compiled, {x: 2}) !== 5) throw new Error('True conditional branch failed');
@@ -43,7 +73,7 @@ for (const [index, item] of manifest.entries()) {
     {expression: 'f(x)=x^2', when: 'when x is zero or positive'},
     {expression: 'f(x)=-x', when: 'when x is negative'},
   ] : undefined;
-  writeFileSync(`video/src/series/${item.slug}.json`, JSON.stringify({...construction, steps, finalLatex: rawLatex, latex: `${signature}=${rawLatex}`,
+  writeFileSync(`video/src/series/${item.slug}.json`, JSON.stringify({...construction, steps: spotlightSteps, introMath: renderedEquation(`${signature}=${rawLatex}`), finalLatex: cleanedLatex, latex: `${signature}=${cleanedLatex}`,
     tutorialTitle: true, hideDomain: item.hideDomain, showCaptions: false, ...(introRules ? {introRules} : {}),
     timing: {line: 1, intro: 0.4, outro: 2}}, null, 2) + '\n');
   writeFileSync(`video/src/series/${item.slug}.tsx`, `import {createWalkthrough} from '../scenes/walkthrough';\nimport trace from './${item.slug}.json';\nexport default createWalkthrough(trace);\n`);
