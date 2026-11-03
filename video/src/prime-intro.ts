@@ -1,3 +1,4 @@
 import {makeProject} from '@motion-canvas/core';
 import opening from './scenes/prime-intro?scene';
-export default makeProject({scenes: [opening]});
+import decision from './scenes/decision-walkthrough?scene';
+export default makeProject({scenes: [opening, decision]});

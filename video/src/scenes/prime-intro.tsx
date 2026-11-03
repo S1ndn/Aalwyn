@@ -1,6 +1,7 @@
-import {Img, Line, Node, Rect, Txt, makeScene2D} from '@motion-canvas/2d';
+import {Code, Img, Line, Node, Rect, Txt, makeScene2D} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, sequence, waitFor} from '@motion-canvas/core';
 import assets from '../opening-assets.json';
+import {aalwynHighlighter} from '../highlighter';
 
 const foreground = '#f0f0f0';
 const accent = '#4fc1ff';
@@ -180,4 +181,79 @@ export default makeScene2D(function* (view) {
   yield* waitFor(2);
   yield* further().opacity(0, 0.5);
   yield* waitFor(0.3);
+
+  const decisionCaption = createRef<Txt>();
+  const pseudo = createRef<Txt>();
+  const decisionImage = createRef<Img>();
+  view.add(<>
+    <Txt ref={decisionCaption} text="What about decisions?" y={-300}
+      fontSize={72} fontWeight={500} fill={foreground} opacity={0}/>
+    <Txt ref={pseudo} text={'if x < 0:\n    return -x\nelse:\n    return x'}
+      x={-420} y={0} fontFamily="Cascadia Code, Consolas, monospace"
+      fontSize={48} lineHeight={76} fill={foreground} opacity={0}/>
+    <Img ref={decisionImage} src={assets.absolute.mathSvg} size={assets.absolute.mathSize as [number, number]}
+      x={430} y={0} scale={1.4} opacity={0}/>
+  </>);
+  yield* decisionCaption().opacity(1, 0.4);
+  yield* waitFor(0.8);
+  yield* pseudo().opacity(1, 0.5);
+  yield* waitFor(1.5);
+  yield* decisionCaption().opacity(0, 0.25);
+  decisionCaption().text('Make negative numbers positive.');
+  yield* decisionCaption().opacity(1, 0.35);
+  yield* waitFor(0.6);
+  yield* decisionImage().opacity(1, 0.5);
+  yield* waitFor(2);
+  yield* all(decisionCaption().opacity(0, 0.3), decisionImage().opacity(0, 0.3), pseudo().opacity(0, 0.3));
+  decisionCaption().text('What if the branches do different things?');
+  decisionCaption().fontSize(60);
+  pseudo().text('if x >= 0:\n    return x^2\nelse:\n    return -x');
+  yield* decisionCaption().opacity(1, 0.4);
+  yield* waitFor(0.5);
+  yield* pseudo().opacity(1, 0.5);
+  yield* waitFor(2);
+  yield* decisionCaption().opacity(0, 0.25);
+  decisionCaption().text('Can we still write one expression?');
+  yield* decisionCaption().opacity(1, 0.35);
+  yield* waitFor(1.5);
+  yield* pseudo().opacity(0, 0.4);
+  decisionImage().src(assets.decisionFormula.mathSvg);
+  decisionImage().size(assets.decisionFormula.mathSize as [number, number]);
+  decisionImage().position([0, 20]);
+  decisionImage().scale(1.65);
+  yield* decisionImage().opacity(1, 0.6);
+  yield* waitFor(1.7);
+  yield* decisionCaption().opacity(0, 0.25);
+  decisionCaption().text('The condition becomes part of the math.');
+  yield* decisionCaption().opacity(1, 0.35);
+  decisionImage().src(assets.highlightedDecision.mathSvg);
+  yield* waitFor(2.5);
+  yield* all(decisionCaption().opacity(0, 0.5), decisionImage().opacity(0, 0.5));
+  const introduction = createRef<Txt>();
+  view.add(<Txt ref={introduction} text="Working these out by hand gets messy."
+    fontSize={64} fill={foreground} opacity={0}/>);
+  yield* introduction().opacity(1, 0.4);
+  yield* waitFor(1.6);
+  yield* introduction().opacity(0, 0.3);
+  introduction().text('So I built something that does it for you.');
+  yield* introduction().opacity(1, 0.4);
+  yield* waitFor(1.8);
+  yield* introduction().opacity(0, 0.35);
+  introduction().text('Aalwyn');
+  introduction().fontSize(120);
+  introduction().fontWeight(600);
+  introduction().fill(accent);
+  yield* introduction().opacity(1, 0.5);
+  yield* waitFor(1.6);
+  yield* introduction().opacity(0, 0.4);
+  const review = createRef<Node>();
+  view.add(<Node ref={review} opacity={0}>
+    <Txt text="Here’s the same decision in Aalwyn." y={-270} fontSize={60} fill={foreground}/>
+    <Code code={assets.decisionSource.trimEnd()} fontFamily="Cascadia Code, Consolas, monospace"
+      fontSize={46} lineHeight={78} highlighter={aalwynHighlighter}/>
+  </Node>);
+  yield* review().opacity(1, 0.5);
+  // A deliberate reading pause before the established code-to-math walkthrough.
+  yield* waitFor(3.5);
+  yield* review().opacity(0, 0.5);
 });

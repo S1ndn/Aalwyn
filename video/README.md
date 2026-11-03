@@ -128,3 +128,14 @@ one instruction at a time: `a = x^2`, `a += 3*x`, `a = sin(a)`, `return a`.
 These are explanatory pseudocode, before introducing Aalwyn syntax. Matching
 math images come from the compiler and are checked at four numerical inputs.
 The segment ends with “Can we take this further?”.
+
+## Decisions and the Aalwyn reveal
+
+The same opening project continues through an absolute-value `if/else`, then the
+rule “x² for x ≥ 0, otherwise −x”. It reveals the compiler-generated expression,
+highlights its arithmetic condition, introduces Aalwyn, and holds the equivalent
+source for 3.5 seconds. A second scene reuses the shared walkthrough: panels,
+code reveal, `f(x)=0` pause, conditional assignment, `end`, and the completion
+border/bounce. Its trace is generated independently in `decision-trace.json`, so
+the standalone examples remain separate. Source: `video/examples/decision.aal`.
+Five numerical inputs include the boundary x=0. The formula has no piecewise node.

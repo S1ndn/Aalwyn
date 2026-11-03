@@ -1,8 +1,15 @@
 import {Code, Img, Latex, Node, Rect, Txt, lines, makeScene2D} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
 import {aalwynHighlighter} from '../highlighter';
-import trace from '../trace.json';
+import defaultTrace from '../trace.json';
 import type {TraceStep} from '../../../src/compiler/trace';
+export interface WalkthroughData {
+  name: string; params: string[]; source: string; domainLatex: string; finalLatex: string;
+  steps: unknown[]; timing?: {line: number; intro: number; outro: number};
+  showCaptions?: boolean; skipFormulaIntro?: boolean;
+}
+
+export function createWalkthrough(trace: WalkthroughData) {
 const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]})[];
 const timing = (trace as unknown as {timing?: {line: number; intro: number; outro: number}}).timing;
 const showCaptions = (trace as unknown as {showCaptions?: boolean}).showCaptions !== false;
@@ -55,7 +62,7 @@ function stepCaption(step: TraceStep): string {
   return ({'+=': 'Add', '-=': 'Subtract', '*=': 'Multiply by', '/=': 'Divide by', '^=': 'Raise to'})[operator] + ' ' + value;
 }
 
-export default makeScene2D(function* (view) {
+return makeScene2D(function* (view) {
   view.fill('#141619');
   view.fontFamily('Segoe UI');
   const section = createRef<Node>();
@@ -93,6 +100,7 @@ export default makeScene2D(function* (view) {
   </Node>);
   formula().scale(() => Math.min(1, 730 / Math.max(1, formula().width()), 300 / Math.max(1, formula().height())));
   let displayedFormula: Latex | Img = formula();
+  if (!trace.skipFormulaIntro) {
   const finalStep = steps.at(-1)!;
   const intro = finalStep.mathSvg
     ? new Img({src: finalStep.mathSvg, size: finalStep.mathSize!, opacity: 0})
@@ -103,6 +111,9 @@ export default makeScene2D(function* (view) {
   yield* waitFor(2);
   yield* all(intro.opacity(0, 0.6), section().opacity(1, 0.6));
   intro.remove();
+  } else {
+    yield* section().opacity(1, 0.6);
+  }
   // Leave a full second of breathing room before revealing the source.
   yield* waitFor(1);
   yield* code().opacity(1, 0.45);
@@ -175,3 +186,6 @@ export default makeScene2D(function* (view) {
   );
   yield* waitFor(timing?.outro ?? 2.4);
 });
+
+}
+export default createWalkthrough(defaultTrace);
