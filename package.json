@@ -12,7 +12,9 @@
     "video:trace": "tsx src/trace-cli.ts video/examples/intro.aal --out video/src/trace.json",
     "video:install": "npm ci --prefix video",
     "video": "npm run video:trace && npm --prefix video start",
-    "video:build": "npm run video:trace && npm --prefix video run build"
+    "video:build": "npm run video:trace && npm --prefix video run build",
+    "video:willans": "tsx video/scripts/willans-trace.ts && npm --prefix video start",
+    "video:willans:build": "tsx video/scripts/willans-trace.ts && npm --prefix video run build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

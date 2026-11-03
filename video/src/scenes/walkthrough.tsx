@@ -1,13 +1,15 @@
-import {Code, Latex, Rect, Txt, lines, makeScene2D} from '@motion-canvas/2d';
+import {Code, Img, Latex, Rect, Txt, lines, makeScene2D} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, waitFor} from '@motion-canvas/core';
 import {aalwynHighlighter} from '../highlighter';
 import trace from '../trace.json';
 import type {TraceStep} from '../../../src/compiler/trace';
-const steps = trace.steps as unknown as TraceStep[];
+const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]})[];
+const timing = (trace as unknown as {timing?: {line: number; intro: number; outro: number}}).timing;
+let mathLabel = `${trace.name}(${trace.params.join(',')})`;
 
 // Change these to retime a scene for your narration.
-const hold = 2.1;
-const transition = 0.8;
+const hold = timing ? 0.12 : 2.1;
+const transition = timing ? 0.38 : 0.8;
 const foreground = '#f0f0f0';
 const muted = '#9d9d9d';
 const accent = '#4fc1ff';
@@ -17,11 +19,11 @@ const accent = '#4fc1ff';
 function equation(tex: string) {
   const slash = String.fromCharCode(92);
   if (['frac', 'sum', 'prod', 'begin'].some(command => tex.includes(slash + command))) {
-    return [`${trace.name}(${trace.params.join(',')})=`, tex];
+    return [`${mathLabel}=`, tex];
   }
   const tokens = /\\operatorname\{[^}]+\}|\\[A-Za-z]+|[A-Za-z]+|\d+/g;
   const body = tex.replace(tokens, token => token.startsWith(slash) ? token : `{{${token}}}`);
-  return `{{${trace.name}(${trace.params.join(',')})=}}${body}`;
+  return `{{${mathLabel}=}}${body}`;
 }
 
 function stepCaption(step: TraceStep): string {
@@ -85,10 +87,31 @@ export default makeScene2D(function* (view) {
     <Txt ref={caption} text="" y={395}
       fontFamily="Segoe UI" fontSize={34} fill={foreground}/>
   </>);
-  yield* waitFor(0.8);
+  formula().scale(() => Math.min(1, 730 / Math.max(1, formula().width()), 300 / Math.max(1, formula().height())));
+  let displayedFormula: Latex | Img = formula();
+  yield* waitFor(timing?.intro ?? 0.8);
   for (const step of steps) {
     const isFinal = step.kind === 'simplify';
-    caption().text(stepCaption(step));
+    caption().text(step.caption ?? stepCaption(step));
+    mathLabel = step.mathLabel ?? `${trace.name}(${trace.params.join(',')})`;
+    if (timing) {
+      const middle = (step.line - 1 + (step.endLine - step.line + 1) / 2) * lineHeight;
+      // Let the browser render the complete MathJax SVG, including stretched delimiters.
+      const nextFormula = new Img({x: 455, y: -35, src: step.mathSvg!,
+        size: step.mathSize!, opacity: 0});
+      view.add(nextFormula);
+      yield* all(
+        displayedFormula.opacity(0, transition), nextFormula.opacity(1, transition),
+        activeLine().opacity(1, transition),
+        activeLine().position([-455, codeY + middle + highlightOffsetY], transition, easeInOutCubic),
+        activeLine().height((step.endLine - step.line + 1) * lineHeight + 6, transition),
+        code().selection(lines(step.line - 1, step.endLine - 1), transition),
+      );
+      displayedFormula.remove();
+      displayedFormula = nextFormula;
+      yield* waitFor(timing.line - transition);
+      continue;
+    }
     if (isFinal) {
       yield* all(activeLine().opacity(0, 0.3), code().selection(lines(0, sourceLines.length - 1), 0.3));
     } else {
@@ -106,5 +129,6 @@ export default makeScene2D(function* (view) {
     yield* waitFor(hold);
   }
   caption().text('Done!');
-  yield* waitFor(2.4);
+  if (timing) yield* all(activeLine().opacity(0, 0.15), code().selection(lines(0, sourceLines.length - 1), 0.15));
+  yield* waitFor(timing?.outro ?? 2.4);
 });

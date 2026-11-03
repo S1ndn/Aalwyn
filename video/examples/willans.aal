@@ -1,0 +1,15 @@
+fn willans(int n ? n >= 1) = 1
+    += sum i from 1 to 2^n (
+        define count sum j from 1 to i (
+            = ((j-1)! + 1)/j
+            *= pi
+            >> cos
+            ^= 2
+            >> floor
+        )
+        = n/count
+        >> floor
+        ^= 1/n
+        >> floor
+    )
+end
