@@ -1,0 +1,6 @@
+fn p(int n)
+    = prod k from 1 to n (
+        = k
+        /= k+1
+    )
+end

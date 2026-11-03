@@ -1,0 +1,10 @@
+fn h(x)
+    define wave using (
+        = x
+        += 3
+        ^= 2
+        >> sin
+    )
+    = wave
+    += wave^2
+end

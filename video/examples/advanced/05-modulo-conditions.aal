@@ -1,0 +1,5 @@
+fn q(int n)
+    = sum k from 1 to n (
+        = k^2 ? (k % 2 == 0) and (k % 3 != 0) else 0
+    )
+end

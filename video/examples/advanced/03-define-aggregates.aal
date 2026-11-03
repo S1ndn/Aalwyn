@@ -1,0 +1,9 @@
+fn f(int n)
+    define s sum i from 1 to n (
+        = i^2
+    )
+    define p prod k from 1 to n (
+        = k/(k+1)
+    )
+    = s+p
+end

@@ -184,3 +184,22 @@ cancels exact opposite total terms. It does not factor, distribute, or reorder
 surviving symbolic terms. Partial expressions are retained when cancellation
 would hide undefined inputs. The six known-target examples assert that the
 finished LaTeX matches their opening expression exactly.
+
+## Advanced standalone follow-up
+
+Run `npm run video:advanced` and open **src/advanced-tutorials**. Build with
+`npm run video:advanced:build`. The separate clip has six chapters: setting a
+sum directly, setting a product directly, named aggregate definitions, an aux
+function f used by g, modulo/and conditions, and a multi-instruction using block.
+Source files are in `video/examples/advanced/`.
+
+The dedicated generator compiles every partial aggregate/body snapshot so terms
+build inside the sigma/product symbols. It shows both f and g for aux functions,
+keeps the helper call named, and builds a using definition independently before
+inserting its value. New features have dark spotlights with brief notes where
+needed. Known goal expressions retain their form; only the condition-heavy
+chapter uses full simplification. Numerical checks cover all six examples,
+empty aggregation identities, and multiple modulo-selection boundaries.
+
+The six advanced chapter exports can be split using:
+`python video/scripts/export-series.py --source video/output/advanced-tutorials.mp4 --examples video/examples/advanced --out video/output/advanced-clips`.

@@ -4,21 +4,22 @@ import {aalwynHighlighter} from '../highlighter';
 import defaultTrace from '../trace.json';
 import type {TraceStep} from '../../../src/compiler/trace';
 export interface Spotlight {
-  line: number; token: string; kind: string; mathSvg: string; mathSize: [number, number];
+  line: number; token: string; kind: string; mathSvg: string; mathSize: [number, number]; note?: string;
 }
 export interface WalkthroughData {
   name: string; params: string[]; source: string; domainLatex: string; finalLatex: string;
   steps: unknown[]; timing?: {line: number; intro: number; outro: number};
   showCaptions?: boolean; skipFormulaIntro?: boolean; tutorialTitle?: boolean; hideDomain?: boolean;
+  initialSignature?: string; auxiliaryMath?: {mathSvg: string; mathSize: number[]}[]; auxiliaryFromLine?: number;
   introMath?: {mathSvg: string; mathSize: number[]};
   introRules?: {expression: string; when: string}[];
 }
 
 export function createWalkthrough(trace: WalkthroughData) {
-const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]; spotlight?: Spotlight})[];
+const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]; spotlight?: Spotlight; spotlights?: Spotlight[]})[];
 const timing = (trace as unknown as {timing?: {line: number; intro: number; outro: number}}).timing;
 const showCaptions = (trace as unknown as {showCaptions?: boolean}).showCaptions !== false;
-let mathLabel = `${trace.name}(${trace.params.join(',')})`;
+let mathLabel = trace.initialSignature ?? `${trace.name}(${trace.params.join(',')})`;
 
 // Change these to retime a scene for your narration.
 const hold = timing ? 0.12 : 2.1;
@@ -68,6 +69,7 @@ function stepCaption(step: TraceStep): string {
 }
 
 return makeScene2D(function* (view) {
+  mathLabel = trace.initialSignature ?? `${trace.name}(${trace.params.join(',')})`;
   view.fill('#141619');
   view.fontFamily('Segoe UI');
   const section = createRef<Node>();
@@ -78,6 +80,7 @@ return makeScene2D(function* (view) {
   const activeLine = createRef<Rect>();
   const caption = createRef<Txt>();
   const detail = createRef<Latex>();
+  const auxiliaries: Img[] = [];
   const source = trace.source.trimEnd();
   const sourceLines = source.split('\n');
   const longest = Math.max(...sourceLines.map(line => line.length));
@@ -103,6 +106,12 @@ return makeScene2D(function* (view) {
     <Txt ref={caption} text="" y={395} opacity={showCaptions ? 1 : 0}
       fontFamily="Segoe UI" fontSize={34} fill={foreground}/>
   </Node>);
+  for (const [index, asset] of (trace.auxiliaryMath ?? []).entries()) {
+    const image = new Img({src: asset.mathSvg, size: asset.mathSize as [number, number],
+      x: 455, y: 170 + index * 80, opacity: 0});
+    section().add(image);
+    auxiliaries.push(image);
+  }
   formula().scale(() => Math.min(1, 730 / Math.max(1, formula().width()), 300 / Math.max(1, formula().height())));
   let displayedFormula: Latex | Img = formula();
   if (trace.tutorialTitle) yield* waitFor(0.4);
@@ -131,7 +140,7 @@ return makeScene2D(function* (view) {
     view.add(introTitles);
   }
   view.add(intro);
-  if (!trace.introRules) formulaIntro.scale(() => Math.min(1.7, 1400 / Math.max(1, formulaIntro.width()), 550 / Math.max(1, formulaIntro.height())));
+  if (!trace.introRules) formulaIntro.scale(() => Math.min(1.7, 1400 / Math.max(1, formulaIntro.width()), (trace.tutorialTitle ? 330 : 550) / Math.max(1, formulaIntro.height())));
   yield* all(intro.opacity(1, 0.55), introTitles.opacity(1, 0.55));
   yield* waitFor(trace.introRules ? 3 : 2);
   yield* all(intro.opacity(0, 0.6), introTitles.opacity(0, 0.6), section().opacity(1, 0.6));
@@ -204,6 +213,11 @@ return makeScene2D(function* (view) {
         <Img x={455} y={-35} src={feature.mathSvg} size={feature.mathSize}/>
       </>);
     }
+    if (feature.kind === 'aux') {
+      (trace.auxiliaryMath ?? []).forEach((asset, index) =>
+        overlay.add(<Img x={455} y={170 + index * 80} src={asset.mathSvg} size={asset.mathSize as [number, number]}/>));
+    }
+    if (feature.note) overlay.add(<Txt text={feature.note} y={395} fontSize={30} fill={foreground}/>);
     section().add(overlay);
     yield* overlay.opacity(1, 0.3);
     yield* waitFor(feature.kind === 'conditional' || feature.kind === 'else' ? 3.5 : feature.kind === 'domain' ? 3 : 2.2);
@@ -228,11 +242,13 @@ return makeScene2D(function* (view) {
         code().selection(lines(step.line - 1, step.endLine - 1), transition),
         detail().tex(step.definition ? String.raw`\mathrm{${step.definition.name}}=${step.definition.latex}` : trace.domainLatex || String.raw`\mathbb{R}`, transition),
         detail().opacity(step.definition || !trace.hideDomain ? 1 : 0, transition),
+        ...auxiliaries.map(image => image.opacity(step.line >= (trace.auxiliaryFromLine ?? 1) ? 1 : 0, transition)),
       );
       displayedFormula.remove();
       displayedFormula = nextFormula;
       yield* waitFor(timing.line - transition);
       if (step.spotlight) yield* showSpotlight(step.spotlight);
+      for (const feature of step.spotlights ?? []) yield* showSpotlight(feature);
       continue;
     }
     if (isFinal) {

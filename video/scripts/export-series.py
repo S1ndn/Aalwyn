@@ -4,11 +4,13 @@ from pathlib import Path
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--out', type=Path, default=Path('video/output/tutorial-clips'))
+parser.add_argument('--source', type=Path, default=Path('video/output/tutorial-series.mp4'))
+parser.add_argument('--examples', type=Path, default=Path('video/examples/series'))
 args = parser.parse_args()
 ffmpeg = Path('video/node_modules/@ffmpeg-installer/win32-x64/ffmpeg.exe')
 ffprobe = Path('video/node_modules/@ffprobe-installer/win32-x64/ffprobe.exe')
-source = Path('video/output/tutorial-series.mp4')
-manifest = json.loads(Path('video/examples/series/manifest.json').read_text())
+source = args.source
+manifest = json.loads((args.examples/'manifest.json').read_text())
 levels = Path('video/output/tutorial-levels.txt')
 subprocess.run([str(ffmpeg), '-v', 'error', '-y', '-i', str(source), '-vf',
     'scale=160:90,signalstats,metadata=print:file=' + levels.as_posix(), '-an', '-f', 'null', 'NUL'], check=True)
@@ -28,7 +30,7 @@ for time, blank in records:
         start = None
 if start is not None: pauses.append((start, records[-1][0] + 1/60))
 if len(pauses) != len(manifest) + 1:
-    raise RuntimeError(f'Expected nine background pauses, got {pauses}')
+    raise RuntimeError(f'Expected {len(manifest)+1} background pauses, got {pauses}')
 cuts = [round((a+b)/2*60)/60 for a,b in pauses[1:-1]]
 args.out.mkdir(parents=True, exist_ok=True)
 subprocess.run([str(ffmpeg), '-v', 'error', '-y', '-i', str(source),
@@ -40,7 +42,7 @@ report = []
 for i,item in enumerate(manifest, 1):
     clip = args.out/(item['slug']+'.mp4')
     (args.out/f'clip-{i:02}.mp4').replace(clip)
-    shutil.copyfile(Path('video/examples/series')/(item['slug']+'.aal'), args.out/(item['slug']+'.aal'))
+    shutil.copyfile(args.examples/(item['slug']+'.aal'), args.out/(item['slug']+'.aal'))
     info = json.loads(subprocess.check_output([str(ffprobe), '-v', 'error', '-show_entries', 'format=duration', '-of', 'json', str(clip)]))
     duration = float(info['format']['duration'])
     for offset in [0, max(0, duration-0.05)]:
@@ -50,6 +52,6 @@ for i,item in enumerate(manifest, 1):
             raise RuntimeError(f'{clip.name} does not start/end with a flat background at {offset}')
     report.append({'file':clip.name, 'title':item['title'], 'seconds':duration})
 (args.out/'index.json').write_text(json.dumps(report,indent=2)+'\n')
-(args.out/'README.md').write_text('# Aalwyn tutorial clips\n\nEight 1080p/60 fps clips, ordered from arithmetic to conditionals. One instruction per second; conditional goals are introduced with two readable rule rows.\nEach starts and ends on the same background color. Construction preserves raw instruction-order LaTeX; a separate final cleanup precedes the completion highlight. Known target expressions retain their form; conditional examples allow full compiler simplification. First-use syntax features get a deeply dimmed visual spotlight. Matching .aal source files are included.\n\n'+
+(args.out/'README.md').write_text(f'# Aalwyn tutorial clips\n\n{len(manifest)} 1080p/60 fps clips in teaching order. One instruction per second; conditional goals are introduced with two readable rule rows.\nEach starts and ends on the same background color. Construction preserves raw instruction-order LaTeX; a separate final cleanup precedes the completion highlight. Known target expressions retain their form; conditional examples allow full compiler simplification. First-use syntax features get a deeply dimmed visual spotlight. Matching .aal source files are included.\n\n'+
     '\n'.join(f"{i}. {r['title']} — {r['file']} ({r['seconds']:.1f}s)" for i,r in enumerate(report,1))+'\n')
 print(json.dumps(report, indent=2))

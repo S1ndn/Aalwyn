@@ -1,0 +1,26 @@
+[
+  {
+    "slug": "01-sum",
+    "title": "Direct sum"
+  },
+  {
+    "slug": "02-product",
+    "title": "Direct product"
+  },
+  {
+    "slug": "03-define-aggregates",
+    "title": "Named aggregate definitions"
+  },
+  {
+    "slug": "04-aux-functions",
+    "title": "Auxiliary functions"
+  },
+  {
+    "slug": "05-modulo-conditions",
+    "title": "Modulo conditions"
+  },
+  {
+    "slug": "06-using-block",
+    "title": "Using blocks"
+  }
+]

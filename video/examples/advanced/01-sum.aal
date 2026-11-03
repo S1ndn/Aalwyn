@@ -1,0 +1,6 @@
+fn s(int n)
+    = sum i from 1 to n (
+        = i
+        ^= 2
+    )
+end
