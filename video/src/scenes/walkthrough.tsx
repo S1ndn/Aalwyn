@@ -1,5 +1,5 @@
-import {Code, Img, Latex, Rect, Txt, lines, makeScene2D} from '@motion-canvas/2d';
-import {all, createRef, easeInOutCubic, waitFor} from '@motion-canvas/core';
+import {Code, Img, Latex, Node, Rect, Txt, lines, makeScene2D} from '@motion-canvas/2d';
+import {all, createRef, easeInOutCubic, easeOutCubic, waitFor} from '@motion-canvas/core';
 import {aalwynHighlighter} from '../highlighter';
 import trace from '../trace.json';
 import type {TraceStep} from '../../../src/compiler/trace';
@@ -58,6 +58,9 @@ function stepCaption(step: TraceStep): string {
 export default makeScene2D(function* (view) {
   view.fill('#141619');
   view.fontFamily('Segoe UI');
+  const section = createRef<Node>();
+  const codePanel = createRef<Rect>();
+  const mathPanel = createRef<Rect>();
   const code = createRef<Code>();
   const formula = createRef<Latex>();
   const activeLine = createRef<Rect>();
@@ -71,27 +74,53 @@ export default makeScene2D(function* (view) {
   const codeY = -155;
   // Center the box on the visible glyphs rather than the line-height leading.
   const highlightOffsetY = -fontSize * 0.24;
-  view.add(<>
+  view.add(<Node ref={section} opacity={0}>
     <Txt text="How it works" fontFamily="Segoe UI" fontWeight={500}
       fontSize={56} fill={foreground} y={-410}/>
-    <Rect x={-455} width={830} height={600} radius={20} fill="#1f1f1f" stroke="#33363d" lineWidth={2}/>
-    <Rect x={455} width={830} height={600} radius={20} fill="#1b1e23" stroke="#33363d" lineWidth={2}/>
+    <Rect ref={codePanel} x={-455} width={830} height={600} radius={20} fill="#1f1f1f" stroke="#33363d" lineWidth={2}/>
+    <Rect ref={mathPanel} x={455} width={830} height={600} radius={20} fill="#1b1e23" stroke="#33363d" lineWidth={2}/>
     <Txt text="The code" x={-455} y={-250} fontSize={26} fill={muted}/>
     <Txt text="The math" x={455} y={-250} fontSize={26} fill={muted}/>
     <Rect ref={activeLine} x={-455} y={codeY + lineHeight / 2 + highlightOffsetY} width={770}
       height={lineHeight + 6} radius={7} fill="#264f784d" stroke="#4fc1ff55" lineWidth={1} opacity={0}/>
-    <Code ref={code} x={-810} y={codeY} offset={[-1, -1]} code={source}
+    <Code ref={code} opacity={0} x={-810} y={codeY} offset={[-1, -1]} code={source}
       fontFamily="Cascadia Code, Consolas, monospace" fontSize={fontSize}
       lineHeight={lineHeight} highlighter={aalwynHighlighter}/>
-    <Latex ref={formula} x={455} y={-35} tex={equation('0')} fontSize={64} fill={foreground}/>
-    <Latex ref={detail} x={455} y={150} tex={trace.domainLatex || String.raw`\mathbb{R}`} fontSize={30} fill={muted}/>
+    <Latex ref={formula} opacity={0} x={455} y={-35} tex={equation('0')} fontSize={64} fill={foreground}/>
+    <Latex ref={detail} opacity={0} x={455} y={150} tex={trace.domainLatex || String.raw`\mathbb{R}`} fontSize={30} fill={muted}/>
     <Txt ref={caption} text="" y={395} opacity={showCaptions ? 1 : 0}
       fontFamily="Segoe UI" fontSize={34} fill={foreground}/>
-  </>);
+  </Node>);
   formula().scale(() => Math.min(1, 730 / Math.max(1, formula().width()), 300 / Math.max(1, formula().height())));
   let displayedFormula: Latex | Img = formula();
-  yield* waitFor(timing?.intro ?? 0.8);
-  for (const step of steps) {
+  const finalStep = steps.at(-1)!;
+  const intro = finalStep.mathSvg
+    ? new Img({src: finalStep.mathSvg, size: finalStep.mathSize!, opacity: 0})
+    : new Latex({tex: equation(trace.finalLatex), fontSize: 64, fill: foreground, opacity: 0});
+  view.add(intro);
+  intro.scale(() => Math.min(1.7, 1400 / Math.max(1, intro.width()), 550 / Math.max(1, intro.height())));
+  yield* intro.opacity(1, 0.55);
+  yield* waitFor(2);
+  yield* all(intro.opacity(0, 0.6), section().opacity(1, 0.6));
+  intro.remove();
+  // Leave a full second of breathing room before revealing the source.
+  yield* waitFor(1);
+  yield* code().opacity(1, 0.45);
+  yield* waitFor(0.4);
+  const firstStep = steps[0];
+  const startIndex = firstStep?.kind === 'start' ? 1 : 0;
+  if (startIndex && firstStep.mathSvg) {
+    formula().remove();
+    displayedFormula = new Img({x: 455, y: -35, src: firstStep.mathSvg, size: firstStep.mathSize!, opacity: 0});
+    section().add(displayedFormula);
+  } else if (startIndex) {
+    formula().tex(equation(firstStep.afterLatex));
+  }
+  activeLine().y(codeY + lineHeight / 2 + highlightOffsetY);
+  code().selection(lines(0, 0));
+  yield* all(displayedFormula.opacity(1, 0.45), detail().opacity(1, 0.45), activeLine().opacity(1, 0.45));
+  yield* waitFor(1);
+  for (const step of steps.slice(startIndex)) {
     const isFinal = step.kind === 'simplify';
     caption().text(step.caption ?? stepCaption(step));
     mathLabel = step.mathLabel ?? `${trace.name}(${trace.params.join(',')})`;
@@ -100,7 +129,7 @@ export default makeScene2D(function* (view) {
       // Let the browser render the complete MathJax SVG, including stretched delimiters.
       const nextFormula = new Img({x: 455, y: -35, src: step.mathSvg!,
         size: step.mathSize!, opacity: 0});
-      view.add(nextFormula);
+      section().add(nextFormula);
       yield* all(
         displayedFormula.opacity(0, transition), nextFormula.opacity(1, transition),
         activeLine().opacity(1, transition),
@@ -130,6 +159,27 @@ export default makeScene2D(function* (view) {
     yield* waitFor(hold);
   }
   caption().text('Done!');
-  if (timing) yield* all(activeLine().opacity(0, 0.15), code().selection(lines(0, sourceLines.length - 1), 0.15));
+  const endLine = sourceLines.map(line => line.trim()).lastIndexOf('end');
+  if (endLine >= 0) {
+    yield* all(
+      activeLine().opacity(1, 0.2),
+      activeLine().y(codeY + (endLine + 0.5) * lineHeight + highlightOffsetY, 0.2),
+      activeLine().height(lineHeight + 6, 0.2),
+      code().selection(lines(endLine, endLine), 0.2),
+    );
+  }
+  // One shared finish cue for both panels, with a restrained equation bounce.
+  const baseScale = displayedFormula.scale();
+  yield* all(
+    codePanel().stroke(accent, 0.35), mathPanel().stroke(accent, 0.35),
+    codePanel().lineWidth(3, 0.35), mathPanel().lineWidth(3, 0.35),
+    displayedFormula.scale(baseScale.scale(1.07), 0.3, easeOutCubic),
+  );
+  yield* displayedFormula.scale(baseScale.scale(0.985), 0.22, easeInOutCubic);
+  yield* all(
+    displayedFormula.scale(baseScale, 0.25, easeOutCubic),
+    activeLine().opacity(0, 0.25),
+    code().selection(lines(0, sourceLines.length - 1), 0.25),
+  );
   yield* waitFor(timing?.outro ?? 2.4);
 });

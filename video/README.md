@@ -78,7 +78,17 @@ production tooling and is not included in the hosted Aalwyn IDE.
 Run `npm run video:willans` for the nested Willans prime formula, or
 `npm run video:willans:build` to regenerate and check it. The dedicated generator
 uses the real compiler for each focused inner expression and the final complete
-formula. Intermediate aggregate bodies show the expression alone; labels appear only for
-the defined `count` and `willans(n)`. Bottom captions are hidden for this example. Fourteen source steps run at 0.5 seconds each,
+formula. Sum bodies build inside their sigma: first the defined `count`, then the full
+`willans(n)` expression. Bottom captions are hidden for this example.
+Instructions run at 0.5 seconds each,
 followed by a two-second hold. This is symbolic construction, not numerical
 iteration of the sums. The ordinary intro commands remain available.
+
+## Presentation timing
+
+Every walkthrough opens with the completed formula, then crossfades to the
+“How it works” panels. After one second the code fades in; the starting expression
+appears after a brief pause, followed by one second before the remaining steps.
+At `end`, both panel borders brighten together and the finished expression grows
+and settles with a small bounce. The Willans animation retains its half-second
+instruction pace and two-second final hold.

@@ -35,16 +35,17 @@ const stages: {line: number; label: string; caption: string; program: string}[] 
 ];
 const captions = ['Start with the Wilson quotient', 'Multiply by π', 'Apply the cosine function', 'Square', 'Round down'];
 detector.forEach((_, index) => stages.push({
-  line: index + 4, label: '', caption: captions[index],
-  program: `fn stage(int j ? j >= 1)\n${detector.slice(0, index + 1).join('\n')}\nend`,
+  line: index + 4, label: 'count', caption: captions[index],
+  program: `fn stage(int i ? i >= 1) = sum j from 1 to i (\n${detector.slice(0, index + 1).join('\n')}\n)\nend`,
 }));
 stages.push({line: 9, label: 'count', caption: 'Sum the prime indicators', program: `fn stage(int i ? i >= 1) = ${count}\nend`});
 const outerCaptions = ['Divide n by the count', 'Round down', 'Take the nth root', 'Round down'];
 outer.forEach((_, index) => stages.push({
-  line: index + 10, label: '', caption: outerCaptions[index],
-  program: `fn stage(int n ? n >= 1, int i ? i >= 1)\ndefine count ${count}\n${outer.slice(0, index + 1).join('\n')}\nend`,
+  line: index + 10, label: 'willans(n)', caption: outerCaptions[index],
+  program: `fn stage(int n ? n >= 1) = 1\n+= sum i from 1 to 2^n (\ndefine count ${count}\n${outer.slice(0, index + 1).join('\n')}\n)\nend`,
 }));
 stages.push({line: 14, label: 'willans(n)', caption: 'Add the outer sum', program: source});
+stages.push({line: 15, label: 'willans(n)', caption: 'Done!', program: source});
 const steps = stages.map(stage => {
   const result = compile(stage.program);
   return {kind: 'start', line: stage.line, endLine: stage.line,
