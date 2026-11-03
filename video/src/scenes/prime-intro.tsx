@@ -1,4 +1,4 @@
-import {Img, Node, Txt, makeScene2D} from '@motion-canvas/2d';
+import {Img, Line, Node, Txt, makeScene2D} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, sequence, waitFor} from '@motion-canvas/core';
 import assets from '../opening-assets.json';
 
@@ -56,13 +56,51 @@ export default makeScene2D(function* (view) {
   });
   yield* sequence(0.55, ...examples.map(image => all(image.opacity(1, 0.4), image.y(200, 0.4, easeOutCubic), image.scale(1, 0.4, easeOutCubic))));
   yield* waitFor(1.7);
-  yield* all(formula().opacity(0, 0.5), caption().opacity(0, 0.5), ...examples.map(image => image.opacity(0, 0.5)));
+  yield* all(caption().opacity(0, 0.3), ...examples.map(image => image.opacity(0, 0.4)),
+    formula().y(-10, 0.5, easeInOutCubic), formula().scale(1.55, 0.5, easeInOutCubic));
+  caption().text('How does it do this?');
+  yield* caption().opacity(1, 0.4);
+  yield* waitFor(1.3);
+  yield* caption().opacity(0, 0.25);
+  caption().text('Look at it like code.');
+  yield* caption().opacity(1, 0.35);
+
+  const loopOverlay = new Img({src: assets.loopHighlight.mathSvg,
+    size: assets.loopHighlight.mathSize as [number, number], y: -10, scale: 1.55, opacity: 0});
+  const primeOverlay = new Img({src: assets.primeHighlight.mathSvg,
+    size: assets.primeHighlight.mathSize as [number, number], y: -10, scale: 1.55, opacity: 0});
+  view.add(loopOverlay);
+  view.add(primeOverlay);
+  const loopLabel = createRef<Node>();
+  const loopArrow = createRef<Line>();
+  view.add(<Node ref={loopLabel} opacity={0}>
+    <Txt text="for" x={-460} y={-235} fontFamily="Cascadia Code, Consolas, monospace"
+      fontSize={64} fontWeight={600} fill={accent}/>
+    <Txt text="Loop through the numbers" x={-440} y={265} fontSize={34} fill={foreground}/>
+    <Line ref={loopArrow} points={[[-420, -195], [-340, -150], [-285, -100]]}
+      stroke={accent} lineWidth={4} radius={28} endArrow arrowSize={14} end={0}/>
+  </Node>);
+  yield* all(loopOverlay.opacity(1, 0.4), formula().opacity(0, 0.4), loopLabel().opacity(1, 0.4));
+  yield* loopArrow().end(1, 0.5, easeOutCubic);
+  yield* waitFor(2.2);
+  yield* loopLabel().opacity(0, 0.3);
+  const primeLabel = createRef<Node>();
+  const primeArrow = createRef<Line>();
+  view.add(<Node ref={primeLabel} opacity={0}>
+    <Txt text="is_prime(j) or j == 1" x={260} y={255}
+      fontFamily="Cascadia Code, Consolas, monospace" fontSize={44} fill={accent}/>
+    <Txt text="A prime check, with a special case for 1" x={260} y={315}
+      fontSize={29} fill={foreground}/>
+    <Line ref={primeArrow} points={[[260, 210], [290, 155], [290, 100]]}
+      stroke={accent} lineWidth={4} radius={28} endArrow arrowSize={14} end={0}/>
+  </Node>);
+  yield* all(loopOverlay.opacity(0, 0.4), primeOverlay.opacity(1, 0.4), primeLabel().opacity(1, 0.4));
+  yield* primeArrow().end(1, 0.5, easeOutCubic);
+  yield* waitFor(3);
+  yield* all(primeOverlay.opacity(0, 0.5), primeLabel().opacity(0, 0.5), caption().opacity(0, 0.5));
   const closing = createRef<Txt>();
-  view.add(<Txt ref={closing} text="How does it do this?" fontSize={76}
+  view.add(<Txt ref={closing} text="" fontSize={76}
     fontWeight={500} fill={foreground} opacity={0}/>);
-  yield* closing().opacity(1, 0.45);
-  yield* waitFor(1.5);
-  yield* closing().opacity(0, 0.3);
   closing().text('It’s programming,');
   closing().y(-55);
   yield* closing().opacity(1, 0.4);

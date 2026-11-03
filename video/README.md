@@ -114,3 +114,10 @@ reveal, Willans' formula, four checked input/output examples, and the
 “It's programming, with math!” payoff. It exports to `video/output/prime-intro.mp4`.
 The original walkthrough remains available as **src/project** on the project
 selection screen. Edit captions and pacing in `src/scenes/prime-intro.tsx`.
+
+The opening includes a short visual bridge from formula to code: the outer sigma
+is highlighted and labelled `for`, then the complete floor-of-cosine-squared
+indicator is highlighted and labelled `is_prime(j) or j == 1`. The special case
+is intentional: the indicator returns one at j=1 as well as at primes. The
+cosine-squared expression alone is not the test. Highlight assets are generated
+from exact matching substrings of the compiler's expression, not redrawn math.
