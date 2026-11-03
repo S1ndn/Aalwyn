@@ -239,18 +239,23 @@ export default makeScene2D(function* (view) {
   yield* introduction().opacity(1, 0.4);
   yield* waitFor(1.8);
   yield* introduction().opacity(0, 0.35);
-  introduction().text('Aalwyn');
-  introduction().fontSize(120);
-  introduction().fontWeight(600);
-  introduction().fill(accent);
-  yield* introduction().opacity(1, 0.5);
+  const logo = createRef<Img>();
+  view.add(<Img ref={logo} src="/aalwyn-logo.png" width={920} opacity={0}/>);
+  yield* logo().opacity(1, 0.5);
   yield* waitFor(1.6);
-  yield* introduction().opacity(0, 0.4);
+  yield* logo().opacity(0, 0.4);
   const review = createRef<Node>();
   view.add(<Node ref={review} opacity={0}>
-    <Txt text="Here’s the same decision in Aalwyn." y={-270} fontSize={60} fill={foreground}/>
-    <Code code={assets.decisionSource.trimEnd()} fontFamily="Cascadia Code, Consolas, monospace"
-      fontSize={46} lineHeight={78} highlighter={aalwynHighlighter}/>
+    <Txt text="Here’s the same decision in Aalwyn." y={-300} fontSize={60} fill={foreground}/>
+    <Txt text="Pseudocode" x={-455} y={-165} fontSize={30} fill="#9d9d9d"/>
+    <Txt text="Aalwyn" x={455} y={-165} fontSize={30} fill="#9d9d9d"/>
+    <Line points={[[0, -115], [0, 200]]} stroke="#33363d" lineWidth={2}/>
+    <Txt text={'if x >= 0:\n    return x^2\nelse:\n    return -x'}
+      x={-455} y={35} fontFamily="Cascadia Code, Consolas, monospace"
+      fontSize={38} lineHeight={65} textAlign="left" fill={foreground}/>
+    <Code code={assets.decisionSource.trimEnd()} x={455} y={35}
+      fontFamily="Cascadia Code, Consolas, monospace"
+      fontSize={30} lineHeight={58} highlighter={aalwynHighlighter}/>
   </Node>);
   yield* review().opacity(1, 0.5);
   // A deliberate reading pause before the established code-to-math walkthrough.
