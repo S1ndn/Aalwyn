@@ -22,7 +22,9 @@
     "video:series": "tsx video/scripts/series-traces.ts && npm --prefix video start",
     "video:series:build": "tsx video/scripts/series-traces.ts && npm --prefix video run build",
     "video:advanced": "tsx video/scripts/advanced-traces.ts && npm --prefix video start",
-    "video:advanced:build": "tsx video/scripts/advanced-traces.ts && npm --prefix video run build"
+    "video:advanced:build": "tsx video/scripts/advanced-traces.ts && npm --prefix video run build",
+    "video:finale": "tsx video/scripts/prime-finale-traces.ts && npm --prefix video start",
+    "video:finale:build": "tsx video/scripts/prime-finale-traces.ts && npm --prefix video run build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

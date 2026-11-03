@@ -1,0 +1,4 @@
+fn f(real x ? x > 0)
+    = x
+    >> ln
+end

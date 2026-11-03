@@ -203,3 +203,9 @@ empty aggregation identities, and multiple modulo-selection boundaries.
 
 The six advanced chapter exports can be split using:
 `python video/scripts/export-series.py --source video/output/advanced-tutorials.mp4 --examples video/examples/advanced --out video/output/advanced-clips`.
+
+## Domains and prime counter finale
+
+Run `npm run video:finale` and select `prime-finale`. This separate 1080p/60 fps clip introduces `fn f(real x ? x > 0)`, then builds a prime test from a product of conditional divisor checks and counts successful tests with a sum. The prime section opens with “Let's make our own prime counter in Aalwyn”. Final examples show counts up to 10, 25, and 100. Every result from 0 through 100 is verified against independent trial division during generation.
+
+Sources: `video/examples/prime-finale/`. Regenerate and check the build with `npm run video:finale:build`.

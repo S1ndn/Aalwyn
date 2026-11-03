@@ -1,0 +1,13 @@
+aux fn isPrime(int m ? m >= 2)
+    = prod d from 2 to m-1 (
+        define remainder m % d
+        = 0 ? (remainder == 0) else 1
+    )
+end
+
+fn primeCount(int n ? n >= 0)
+    = sum m from 2 to n (
+        = 0
+        += 1 ? (isPrime(m) == 1)
+    )
+end
