@@ -50,6 +50,6 @@ for i,item in enumerate(manifest, 1):
             raise RuntimeError(f'{clip.name} does not start/end with a flat background at {offset}')
     report.append({'file':clip.name, 'title':item['title'], 'seconds':duration})
 (args.out/'index.json').write_text(json.dumps(report,indent=2)+'\n')
-(args.out/'README.md').write_text('# Aalwyn tutorial clips\n\nEight 1080p/60 fps clips, ordered from arithmetic to conditionals.\nEach starts and ends on the same background color. Expressions preserve raw instruction-order LaTeX without a final simplification or factorization. Matching .aal source files are included.\n\n'+
+(args.out/'README.md').write_text('# Aalwyn tutorial clips\n\nEight 1080p/60 fps clips, ordered from arithmetic to conditionals. One instruction per second; conditional goals are introduced with two readable rule rows.\nEach starts and ends on the same background color. Expressions preserve raw instruction-order LaTeX without a final simplification or factorization. Matching .aal source files are included.\n\n'+
     '\n'.join(f"{i}. {r['title']} — {r['file']} ({r['seconds']:.1f}s)" for i,r in enumerate(report,1))+'\n')
 print(json.dumps(report, indent=2))

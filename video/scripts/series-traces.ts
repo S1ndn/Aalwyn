@@ -36,9 +36,16 @@ for (const [index, item] of manifest.entries()) {
   if (Math.abs(evaluateFunction(compiled, inputs) - expected) > 1e-10 || Math.abs(evaluateMath(compiled.ir, inputs) - expected) > 1e-10) throw new Error(`Failed ${item.slug}`);
   if (index === 6 && evaluateFunction(compiled, {x: 2}) !== 5) throw new Error('True conditional branch failed');
   if (index === 7 && (evaluateFunction(compiled, {x: 2}) !== 4 || evaluateFunction(compiled, {x: 0}) !== 0)) throw new Error('Conditional start boundary failed');
+  const introRules = index === 6 ? [
+    {expression: 'f(x)=x+3', when: 'when x is zero or positive'},
+    {expression: 'f(x)=x', when: 'when x is negative'},
+  ] : index === 7 ? [
+    {expression: 'f(x)=x^2', when: 'when x is zero or positive'},
+    {expression: 'f(x)=-x', when: 'when x is negative'},
+  ] : undefined;
   writeFileSync(`video/src/series/${item.slug}.json`, JSON.stringify({...construction, steps, finalLatex: rawLatex, latex: `${signature}=${rawLatex}`,
-    tutorialTitle: true, hideDomain: item.hideDomain, showCaptions: false,
-    timing: {line: 0.5, intro: 0.4, outro: 2}}, null, 2) + '\n');
+    tutorialTitle: true, hideDomain: item.hideDomain, showCaptions: false, ...(introRules ? {introRules} : {}),
+    timing: {line: 1, intro: 0.4, outro: 2}}, null, 2) + '\n');
   writeFileSync(`video/src/series/${item.slug}.tsx`, `import {createWalkthrough} from '../scenes/walkthrough';\nimport trace from './${item.slug}.json';\nexport default createWalkthrough(trace);\n`);
 }
 writeFileSync('video/src/tutorial-series.ts', `import {makeProject} from '@motion-canvas/core';\n${manifest.map((item, i) => `import clip${i} from './series/${item.slug}?scene';`).join('\n')}\nexport default makeProject({scenes: [${manifest.map((_, i) => `clip${i}`).join(', ')}]});\n`);

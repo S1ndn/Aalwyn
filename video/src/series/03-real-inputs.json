@@ -170,7 +170,7 @@
   "hideDomain": false,
   "showCaptions": false,
   "timing": {
-    "line": 0.5,
+    "line": 1,
     "intro": 0.4,
     "outro": 2
   }

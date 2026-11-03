@@ -163,3 +163,8 @@ The tutorial series uses raw lowered LaTeX for every construction step, the
 opening expression, definition values, and the final frame. It does not run a
 presentation simplification/factorization step or reorder the finished expression.
 Both raw and simplified evaluator results are checked against the expected values.
+
+Tutorial instructions now advance once per second. Conditional introductions
+show two separate expression/condition rows in ordinary language, rather than
+the expanded arithmetic encoding. The expanded raw formula still builds during
+the walkthrough. Conditional title cards hold for three seconds for reading.

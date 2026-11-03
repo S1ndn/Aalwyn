@@ -7,6 +7,7 @@ export interface WalkthroughData {
   name: string; params: string[]; source: string; domainLatex: string; finalLatex: string;
   steps: unknown[]; timing?: {line: number; intro: number; outro: number};
   showCaptions?: boolean; skipFormulaIntro?: boolean; tutorialTitle?: boolean; hideDomain?: boolean;
+  introRules?: {expression: string; when: string}[];
 }
 
 export function createWalkthrough(trace: WalkthroughData) {
@@ -103,9 +104,19 @@ return makeScene2D(function* (view) {
   if (trace.tutorialTitle) yield* waitFor(0.4);
   if (!trace.skipFormulaIntro) {
   const finalStep = steps.at(-1)!;
-  const intro = finalStep.mathSvg
+  const formulaIntro = finalStep.mathSvg
     ? new Img({src: finalStep.mathSvg, size: finalStep.mathSize!, opacity: 0})
     : new Latex({tex: equation(trace.finalLatex), fontSize: 64, fill: foreground, opacity: 0});
+  const intro: Node = trace.introRules ? new Node({opacity: 0}) : formulaIntro;
+  if (trace.introRules) {
+    trace.introRules.forEach((rule, index) => {
+      const y = (index - (trace.introRules!.length - 1) / 2) * 145;
+      intro.add(<>
+        <Latex tex={rule.expression} x={-345} y={y} fontSize={64} fill={foreground}/>
+        <Txt text={rule.when} x={235} y={y} fontSize={38} fill={foreground}/>
+      </>);
+    });
+  }
   const introTitles = new Node({opacity: 0});
   if (trace.tutorialTitle) {
     introTitles.add(<>
@@ -115,9 +126,9 @@ return makeScene2D(function* (view) {
     view.add(introTitles);
   }
   view.add(intro);
-  intro.scale(() => Math.min(1.7, 1400 / Math.max(1, intro.width()), 550 / Math.max(1, intro.height())));
+  if (!trace.introRules) formulaIntro.scale(() => Math.min(1.7, 1400 / Math.max(1, formulaIntro.width()), 550 / Math.max(1, formulaIntro.height())));
   yield* all(intro.opacity(1, 0.55), introTitles.opacity(1, 0.55));
-  yield* waitFor(2);
+  yield* waitFor(trace.introRules ? 3 : 2);
   yield* all(intro.opacity(0, 0.6), introTitles.opacity(0, 0.6), section().opacity(1, 0.6));
   intro.remove();
   introTitles.remove();

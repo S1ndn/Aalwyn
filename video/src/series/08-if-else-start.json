@@ -625,8 +625,18 @@
   "tutorialTitle": true,
   "hideDomain": true,
   "showCaptions": false,
+  "introRules": [
+    {
+      "expression": "f(x)=x^2",
+      "when": "when x is zero or positive"
+    },
+    {
+      "expression": "f(x)=-x",
+      "when": "when x is negative"
+    }
+  ],
   "timing": {
-    "line": 0.5,
+    "line": 1,
     "intro": 0.4,
     "outro": 2
   }
