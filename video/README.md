@@ -121,3 +121,10 @@ indicator is highlighted and labelled `is_prime(j) or j == 1`. The special case
 is intentional: the indicator returns one at j=1 as well as at primes. The
 cosine-squared expression alone is not the test. Highlight assets are generated
 from exact matching substrings of the compiler's expression, not redrawn math.
+
+The opening continues with “Well, that example was really hard” (red emphasis),
+then `f(x) = sin(x² + 3x)`. A simple pseudocode sequence constructs the expression
+one instruction at a time: `a = x^2`, `a += 3*x`, `a = sin(a)`, `return a`.
+These are explanatory pseudocode, before introducing Aalwyn syntax. Matching
+math images come from the compiler and are checked at four numerical inputs.
+The segment ends with “Can we take this further?”.

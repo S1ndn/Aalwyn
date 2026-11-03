@@ -1,4 +1,4 @@
-import {Img, Line, Node, Txt, makeScene2D} from '@motion-canvas/2d';
+import {Img, Line, Node, Rect, Txt, makeScene2D} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, sequence, waitFor} from '@motion-canvas/core';
 import assets from '../opening-assets.json';
 
@@ -111,5 +111,73 @@ export default makeScene2D(function* (view) {
   yield* all(payoff().opacity(1, 0.4), payoff().scale(1, 0.4, easeOutCubic));
   yield* waitFor(2);
   yield* all(closing().opacity(0, 0.5), payoff().opacity(0, 0.5));
+  yield* waitFor(0.3);
+
+  const difficulty = createRef<Node>();
+  view.add(<Node ref={difficulty} opacity={0}>
+    <Txt text="Well, that example was" y={-55} fontSize={68} fill={foreground}/>
+    <Txt text="really hard" y={45} fontSize={88} fontWeight={600} fill="#f16c75"/>
+  </Node>);
+  yield* difficulty().opacity(1, 0.45);
+  yield* waitFor(1.8);
+  yield* difficulty().opacity(0, 0.4);
+  difficulty().remove();
+  const simpleCaption = createRef<Txt>();
+  const simpleFormula = createRef<Img>();
+  view.add(<>
+    <Txt ref={simpleCaption} text="Let’s take a simpler example." y={-260}
+      fontSize={64} fontWeight={500} fill={foreground} opacity={0}/>
+    <Img ref={simpleFormula} src={assets.simpleFormula.mathSvg}
+      size={assets.simpleFormula.mathSize as [number, number]} y={30} scale={1.6} opacity={0}/>
+  </>);
+  yield* simpleCaption().opacity(1, 0.4);
+  yield* waitFor(0.4);
+  yield* all(simpleFormula().opacity(1, 0.5), simpleFormula().y(0, 0.5, easeOutCubic));
+  yield* waitFor(1.8);
+  yield* simpleCaption().opacity(0, 0.25);
+  simpleCaption().text('How is this code?');
+  yield* simpleCaption().opacity(1, 0.35);
+  yield* waitFor(1.7);
+  yield* all(simpleCaption().opacity(0, 0.3), simpleFormula().opacity(0, 0.3));
+  simpleCaption().text('Well, it’s just a series of instructions!');
+  simpleCaption().y(-300);
+  yield* simpleCaption().opacity(1, 0.4);
+  yield* waitFor(0.6);
+
+  const instructionGroup = createRef<Node>();
+  const highlight = createRef<Rect>();
+  const instructionNodes: Txt[] = [];
+  const instructions = ['a = x^2', 'a += 3*x', 'a = sin(a)', 'return a'];
+  view.add(<Node ref={instructionGroup}>
+    <Rect ref={highlight} x={-400} y={-90} width={600} height={80}
+      radius={8} fill="#264f784d" stroke="#4fc1ff55" lineWidth={1} opacity={0}/>
+    {instructions.map((instruction, index) => <Txt ref={node => instructionNodes.push(node)}
+      text={instruction} x={-680} y={-90 + index * 100} offset={[-1, 0]}
+      fontFamily="Cascadia Code, Consolas, monospace" fontSize={48}
+      fill={foreground} opacity={0}/>)}
+  </Node>);
+  let activeExpression: Img | undefined;
+  for (let index = 0; index < instructions.length; index++) {
+    const stage = index < 3 ? assets.simpleStages[index] : assets.simpleFormula;
+    const next = new Img({src: stage.mathSvg, size: stage.mathSize as [number, number],
+      x: 430, y: 20, opacity: 0});
+    view.add(next);
+    yield* all(
+      instructionNodes[index].opacity(1, 0.4),
+      highlight().opacity(1, 0.3), highlight().y(-90 + index * 100, 0.4, easeInOutCubic),
+      next.opacity(1, 0.4), ...(activeExpression ? [activeExpression.opacity(0, 0.4)] : []),
+    );
+    activeExpression?.remove();
+    activeExpression = next;
+    yield* waitFor(1);
+  }
+  yield* waitFor(0.7);
+  yield* all(instructionGroup().opacity(0, 0.5), activeExpression!.opacity(0, 0.5), simpleCaption().opacity(0, 0.5));
+  const further = createRef<Txt>();
+  view.add(<Txt ref={further} text="Can we take this further?" fontSize={80}
+    fontWeight={500} fill={foreground} opacity={0}/>);
+  yield* further().opacity(1, 0.5);
+  yield* waitFor(2);
+  yield* further().opacity(0, 0.5);
   yield* waitFor(0.3);
 });

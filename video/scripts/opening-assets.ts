@@ -1,5 +1,5 @@
 import {readFileSync, writeFileSync} from 'node:fs';
-import {compile, evaluateFunction} from '../../src/compiler/compiler';
+import {compile, evaluateFunction, latex} from '../../src/compiler/compiler';
 import {renderedEquation} from './math-svg';
 const compiled = compile(readFileSync('video/examples/willans.aal', 'utf8'));
 const tex = `w(n)=${compiled.expressionLatex}`;
@@ -11,11 +11,23 @@ if (!tex.includes(sigma) || !tex.includes(indicator)) throw new Error('Highlight
 const highlight = (target: string) => renderedEquation(tex.replace(target, `{${slash}color{#4fc1ff}${target}}`));
 const loopHighlight = highlight(sigma);
 const primeHighlight = highlight(indicator);
+const simpleSource = 'fn f(real x) = x^2\n+= 3*x\n>> sin\nend';
+const simple = compile(simpleSource);
+const simpleFormula = renderedEquation(`f(x)=${latex(simple.ir)}`);
+const simpleStages = [
+  compile('fn f(real x) = x^2\nend'),
+  compile('fn f(real x) = x^2\n+= 3*x\nend'),
+  simple,
+].map(stage => renderedEquation(`a=${latex(stage.ir)}`));
+for (const x of [-2, 0, 1, 3]) {
+  if (Math.abs(evaluateFunction(simple, {x}) - Math.sin(x*x+3*x)) > 1e-12)
+    throw new Error('Simple instruction example differs from sin(x² + 3x)');
+}
 const examples = [1, 2, 3, 6].map(n => {
   const prime = evaluateFunction(compiled, {n});
   const expected = ({1: 2, 2: 3, 3: 5, 6: 13} as Record<number, number>)[n];
   if (prime !== expected) throw new Error(`Incorrect w(${n})`);
   return {n, prime, ...renderedEquation(`w(${n})=${prime}`)};
 });
-writeFileSync('video/src/opening-assets.json', JSON.stringify({formula, loopHighlight, primeHighlight, examples}, null, 2) + '\n');
+writeFileSync('video/src/opening-assets.json', JSON.stringify({formula, loopHighlight, primeHighlight, examples, simpleFormula, simpleStages}, null, 2) + '\n');
 console.log('Generated Willans formula and verified four prime outputs');
