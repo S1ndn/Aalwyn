@@ -239,16 +239,13 @@ export default makeScene2D(function* (view) {
   yield* introduction().opacity(1, 0.4);
   yield* waitFor(1.8);
   yield* introduction().opacity(0, 0.35);
-  const logo = createRef<Img>();
-  const logoName = createRef<Txt>();
-  view.add(<>
-    <Img ref={logo} src="/aalwyn-logo.png" width={680} y={-65} opacity={0}/>
-    <Txt ref={logoName} text="Aalwyn" y={100} fontSize={64}
-      fontWeight={500} fill={foreground} opacity={0}/>
-  </>);
-  yield* all(logo().opacity(1, 0.5), logoName().opacity(1, 0.5));
+  introduction().text('Aalwyn');
+  introduction().fontSize(120);
+  introduction().fontWeight(600);
+  introduction().fill(accent);
+  yield* introduction().opacity(1, 0.5);
   yield* waitFor(1.6);
-  yield* all(logo().opacity(0, 0.4), logoName().opacity(0, 0.4));
+  yield* introduction().opacity(0, 0.4);
   const review = createRef<Node>();
   view.add(<Node ref={review} opacity={0}>
     <Txt text="Here’s the same decision in Aalwyn." y={-300} fontSize={60} fill={foreground}/>
@@ -261,6 +258,8 @@ export default makeScene2D(function* (view) {
     <Code code={assets.decisionSource.trimEnd()} x={455} y={35}
       fontFamily="Cascadia Code, Consolas, monospace"
       fontSize={30} lineHeight={58} highlighter={aalwynHighlighter}/>
+    <Img src={assets.decisionFormula.mathSvg} size={assets.decisionFormula.mathSize as [number, number]}
+      y={300} scale={1.3}/>
   </Node>);
   yield* review().opacity(1, 0.5);
   // A deliberate reading pause before the established code-to-math walkthrough.

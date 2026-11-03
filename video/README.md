@@ -140,6 +140,6 @@ border/bounce. Its trace is generated independently in `decision-trace.json`, so
 the standalone examples remain separate. Source: `video/examples/decision.aal`.
 Five numerical inputs include the boundary x=0. The formula has no piecewise node.
 
-The Aalwyn reveal uses the supplied transparent wordmark at
-`video/public/aalwyn-logo.png`. During the reading pause, the original decision
-pseudocode and the highlighted Aalwyn source appear side by side with labels.
+The reveal uses a plain Aalwyn title. During the reading pause, the original
+decision pseudocode and the highlighted Aalwyn source appear side by side with
+labels, with the original compiled expression below.
