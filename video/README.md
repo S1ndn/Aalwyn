@@ -87,8 +87,20 @@ iteration of the sums. The ordinary intro commands remain available.
 ## Presentation timing
 
 Every walkthrough opens with the completed formula, then crossfades to the
-“How it works” panels. After one second the code fades in; the starting expression
-appears after a brief pause, followed by one second before the remaining steps.
+“How it works” panels. After one second the code fades in; the preview `f(…) = 0`
+appears after a brief pause. It holds for one second before the first instruction
+sets the declared starting value.
 At `end`, both panel borders brighten together and the finished expression grows
 and settles with a small bounce. The Willans animation retains its half-second
 instruction pace and two-second final hold.
+
+## Conditional prime-product example
+
+Run `npm run video:prime-log` to open the conditional example, or
+`npm run video:prime-log:build` to regenerate and build it. Source:
+`video/examples/prime-log.aal`. It computes the logarithm of the product of all
+primes up to `n`: an inner sum counts proper divisors, a conditional sets the exponent of `k` to `1`
+when that count is zero and `0` otherwise, then the product passes through `ln`.
+Both conditional forms are present. Each intermediate formula comes from the
+compiler, with sum and product bodies kept inside their aggregation signs.
+The generator checks five inputs against independently specified prime products.

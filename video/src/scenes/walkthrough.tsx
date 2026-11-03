@@ -107,20 +107,12 @@ export default makeScene2D(function* (view) {
   yield* waitFor(1);
   yield* code().opacity(1, 0.45);
   yield* waitFor(0.4);
-  const firstStep = steps[0];
-  const startIndex = firstStep?.kind === 'start' ? 1 : 0;
-  if (startIndex && firstStep.mathSvg) {
-    formula().remove();
-    displayedFormula = new Img({x: 455, y: -35, src: firstStep.mathSvg, size: firstStep.mathSize!, opacity: 0});
-    section().add(displayedFormula);
-  } else if (startIndex) {
-    formula().tex(equation(firstStep.afterLatex));
-  }
+  // The pause previews the implicit zero; the first instruction sets the declared start.
   activeLine().y(codeY + lineHeight / 2 + highlightOffsetY);
   code().selection(lines(0, 0));
   yield* all(displayedFormula.opacity(1, 0.45), detail().opacity(1, 0.45), activeLine().opacity(1, 0.45));
   yield* waitFor(1);
-  for (const step of steps.slice(startIndex)) {
+  for (const step of steps) {
     const isFinal = step.kind === 'simplify';
     caption().text(step.caption ?? stepCaption(step));
     mathLabel = step.mathLabel ?? `${trace.name}(${trace.params.join(',')})`;

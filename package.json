@@ -14,7 +14,9 @@
     "video": "npm run video:trace && npm --prefix video start",
     "video:build": "npm run video:trace && npm --prefix video run build",
     "video:willans": "tsx video/scripts/willans-trace.ts && npm --prefix video start",
-    "video:willans:build": "tsx video/scripts/willans-trace.ts && npm --prefix video run build"
+    "video:willans:build": "tsx video/scripts/willans-trace.ts && npm --prefix video run build",
+    "video:prime-log": "tsx video/scripts/prime-log-trace.ts && npm --prefix video start",
+    "video:prime-log:build": "tsx video/scripts/prime-log-trace.ts && npm --prefix video run build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",
