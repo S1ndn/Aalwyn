@@ -35,13 +35,13 @@ const stages: {line: number; label: string; caption: string; program: string}[] 
 ];
 const captions = ['Start with the Wilson quotient', 'Multiply by π', 'Apply the cosine function', 'Square', 'Round down'];
 detector.forEach((_, index) => stages.push({
-  line: index + 4, label: 'term(j)', caption: captions[index],
+  line: index + 4, label: '', caption: captions[index],
   program: `fn stage(int j ? j >= 1)\n${detector.slice(0, index + 1).join('\n')}\nend`,
 }));
 stages.push({line: 9, label: 'count', caption: 'Sum the prime indicators', program: `fn stage(int i ? i >= 1) = ${count}\nend`});
 const outerCaptions = ['Divide n by the count', 'Round down', 'Take the nth root', 'Round down'];
 outer.forEach((_, index) => stages.push({
-  line: index + 10, label: 'term(i)', caption: outerCaptions[index],
+  line: index + 10, label: '', caption: outerCaptions[index],
   program: `fn stage(int n ? n >= 1, int i ? i >= 1)\ndefine count ${count}\n${outer.slice(0, index + 1).join('\n')}\nend`,
 }));
 stages.push({line: 14, label: 'willans(n)', caption: 'Add the outer sum', program: source});
@@ -50,9 +50,9 @@ const steps = stages.map(stage => {
   return {kind: 'start', line: stage.line, endLine: stage.line,
     source: source.split('\n')[stage.line - 1], title: stage.caption,
     caption: stage.caption, mathLabel: stage.label,
-    ...renderedEquation(`${stage.label}=${latex(result.ir)}`),
+    ...renderedEquation(`${stage.label ? stage.label + "=" : ""}${latex(result.ir)}`),
     before: result.ir, after: result.ir, beforeLatex: latex(result.ir), afterLatex: latex(result.ir)};
 });
 if (steps.at(-1)!.afterLatex !== latex(compile(source).ir)) throw new Error('Final formula differs from compiler output');
-writeFileSync('video/src/trace.json', JSON.stringify({...full, timing: {line: 0.5, intro: 0.4, outro: 2}, steps}, null, 2) + '\n');
+writeFileSync('video/src/trace.json', JSON.stringify({...full, showCaptions: false, timing: {line: 0.5, intro: 0.4, outro: 2}, steps}, null, 2) + '\n');
 console.log(`Generated ${steps.length} compiler-backed Willans stages`);

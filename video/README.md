@@ -78,7 +78,7 @@ production tooling and is not included in the hosted Aalwyn IDE.
 Run `npm run video:willans` for the nested Willans prime formula, or
 `npm run video:willans:build` to regenerate and check it. The dedicated generator
 uses the real compiler for each focused inner expression and the final complete
-formula. The math label identifies the current scope (`term(j)`, `count`,
-`term(i)`, then `willans(n)`). Fourteen source steps run at 0.5 seconds each,
+formula. Intermediate aggregate bodies show the expression alone; labels appear only for
+the defined `count` and `willans(n)`. Bottom captions are hidden for this example. Fourteen source steps run at 0.5 seconds each,
 followed by a two-second hold. This is symbolic construction, not numerical
 iteration of the sums. The ordinary intro commands remain available.

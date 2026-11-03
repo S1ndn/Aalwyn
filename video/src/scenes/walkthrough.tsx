@@ -5,6 +5,7 @@ import trace from '../trace.json';
 import type {TraceStep} from '../../../src/compiler/trace';
 const steps = trace.steps as unknown as (TraceStep & {caption?: string; mathLabel?: string; mathSvg?: string; mathSize?: [number, number]})[];
 const timing = (trace as unknown as {timing?: {line: number; intro: number; outro: number}}).timing;
+const showCaptions = (trace as unknown as {showCaptions?: boolean}).showCaptions !== false;
 let mathLabel = `${trace.name}(${trace.params.join(',')})`;
 
 // Change these to retime a scene for your narration.
@@ -84,7 +85,7 @@ export default makeScene2D(function* (view) {
       lineHeight={lineHeight} highlighter={aalwynHighlighter}/>
     <Latex ref={formula} x={455} y={-35} tex={equation('0')} fontSize={64} fill={foreground}/>
     <Latex ref={detail} x={455} y={150} tex={trace.domainLatex || String.raw`\mathbb{R}`} fontSize={30} fill={muted}/>
-    <Txt ref={caption} text="" y={395}
+    <Txt ref={caption} text="" y={395} opacity={showCaptions ? 1 : 0}
       fontFamily="Segoe UI" fontSize={34} fill={foreground}/>
   </>);
   formula().scale(() => Math.min(1, 730 / Math.max(1, formula().width()), 300 / Math.max(1, formula().height())));
