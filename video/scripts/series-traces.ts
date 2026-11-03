@@ -2,6 +2,7 @@ import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
 import {compile, evaluateFunction, evaluateMath, latex, lower} from '../../src/compiler/compiler';
 import {trace} from '../../src/compiler/trace';
 import {renderedEquation} from './math-svg';
+import {basicCleanup} from './basic-cleanup';
 const manifest = JSON.parse(readFileSync('video/examples/series/manifest.json', 'utf8')) as {slug: string; title: string; hideDomain: boolean}[];
 const checks = [
   [{x: 2}, 10], [{x: 2}, 12], [{x: 2, y: 6}, 4], [{n: 4}, 10],
@@ -32,10 +33,12 @@ for (const [index, item] of manifest.entries()) {
     endLine: source.trimEnd().split('\n').length, source: 'end', title: 'Finish',
     before: last.after, beforeLatex: last.afterLatex, after: compiled.ir, afterLatex: rawLatex,
     ...renderedEquation(`${signature}=${rawLatex}`)});
-  const cleanedLatex = compiled.expressionLatex;
+  const cleaned = index >= 6 ? compiled.simplified : basicCleanup(compiled.ir);
+  const cleanedLatex = latex(cleaned);
+  if (index < 6 && cleanedLatex !== rawLatex) throw new Error(`Known target changed shape: ${item.slug}`);
   steps.push({...last, kind: 'simplify', line: source.trimEnd().split('\n').length,
     endLine: source.trimEnd().split('\n').length, source: 'end', title: 'Simplify',
-    before: compiled.ir, beforeLatex: rawLatex, after: compiled.simplified, afterLatex: cleanedLatex,
+    before: compiled.ir, beforeLatex: rawLatex, after: cleaned, afterLatex: cleanedLatex,
     ...renderedEquation(`${signature}=${cleanedLatex}`)});
   const featureSets: {line: number; token: string; kind: string; target?: string}[][] = [
     [{line: 1, token: '= x', kind: 'operation', target: 'x'},
@@ -63,6 +66,7 @@ for (const [index, item] of manifest.entries()) {
     return {...step, spotlight: {...feature, ...renderedEquation(expression)}};
   });
   const [inputs, expected] = checks[index];
+  if (Math.abs(evaluateMath(cleaned, inputs) - expected) > 1e-10) throw new Error(`Cleanup changed ${item.slug}`);
   if (Math.abs(evaluateFunction(compiled, inputs) - expected) > 1e-10 || Math.abs(evaluateMath(compiled.ir, inputs) - expected) > 1e-10) throw new Error(`Failed ${item.slug}`);
   if (index === 6 && evaluateFunction(compiled, {x: 2}) !== 5) throw new Error('True conditional branch failed');
   if (index === 7 && (evaluateFunction(compiled, {x: 2}) !== 4 || evaluateFunction(compiled, {x: 0}) !== 0)) throw new Error('Conditional start boundary failed');

@@ -157,12 +157,23 @@ return makeScene2D(function* (view) {
       ranges.push(word(feature.line - 1, start, feature.token.length));
       start = text.indexOf(feature.token, start + feature.token.length);
     }
+    const offsets = sourceLines.map((_, line) => sourceLines.slice(0, line).reduce((sum, value) => sum + value.length + 1, 0));
+    const selected = ranges.map(range => [offsets[range[0][0]] + range[0][1], offsets[range[1][0]] + range[1][1]]);
+    const focusedHighlighter: typeof aalwynHighlighter = {
+      ...aalwynHighlighter,
+      highlight(index, cache) {
+        const original = aalwynHighlighter.highlight(index, cache);
+        const active = selected.some(([from, to]) => from <= index && index < to);
+        const boundary = Math.min(index + original.skipAhead, ...selected.flat().filter(value => value > index));
+        return {color: active ? original.color : '#141619', skipAhead: boundary - index};
+      },
+    };
     const overlay = new Node({opacity: 0});
     overlay.add(<>
-      <Rect width={1920} height={1080} fill="#141619" opacity={0.9}/>
+      <Rect width={1920} height={1080} fill="#141619" opacity={0.985}/>
       <Code x={-810} y={codeY} offset={[-1, -1]} code={source}
         fontFamily="Cascadia Code, Consolas, monospace" fontSize={fontSize}
-        lineHeight={lineHeight} highlighter={aalwynHighlighter} selection={ranges}/>
+        lineHeight={lineHeight} highlighter={focusedHighlighter} selection={ranges}/>
     </>);
     if (feature.kind === 'domain') {
       overlay.add(<>

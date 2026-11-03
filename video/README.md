@@ -160,8 +160,9 @@ background pauses and verifies that each exported clip starts and ends on a
 flat background. Files appear in `video/output/tutorial-clips/`.
 
 The tutorial series uses raw lowered LaTeX for construction steps, opening
-expressions, and definition values. A separate final step applies the compiler's
-simplifier before the completion border and bounce. Both raw and simplified
+expressions, and definition values. A separate final step performs basic cleanup before the completion border and
+bounce. Known expression targets retain their term order and grouping; conditional
+examples use the compiler's full simplifier. Both raw and simplified
 evaluator results are checked against the expected values.
 
 Tutorial instructions now advance once per second. Conditional introductions
@@ -175,3 +176,11 @@ addition, multiplication, powers, division, real/integer types, function calls,
 definitions, and both conditional forms. Type spotlights emphasize the matching
 “for …” domain. Conditional spotlights use concise true/false outcomes.
 The normal instruction pace remains one second per line outside these pauses.
+
+Spotlight veils are now 98.5% opaque, and unselected code tokens use the background
+color rather than retaining the normal code-selection brightness. Basic cleanup
+removes neutral terms, folds numeric constants, collapses double negatives, and
+cancels exact opposite total terms. It does not factor, distribute, or reorder
+surviving symbolic terms. Partial expressions are retained when cancellation
+would hide undefined inputs. The six known-target examples assert that the
+finished LaTeX matches their opening expression exactly.
