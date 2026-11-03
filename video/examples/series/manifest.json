@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "01-arithmetic",
+    "title": "Arithmetic",
+    "hideDomain": true
+  },
+  {
+    "slug": "02-polynomial",
+    "title": "Polynomial",
+    "hideDomain": true
+  },
+  {
+    "slug": "03-real-inputs",
+    "title": "Real inputs",
+    "hideDomain": false
+  },
+  {
+    "slug": "04-integer-input",
+    "title": "Integer input",
+    "hideDomain": false
+  },
+  {
+    "slug": "05-function-calls",
+    "title": "Function calls",
+    "hideDomain": true
+  },
+  {
+    "slug": "06-definitions",
+    "title": "Definitions",
+    "hideDomain": true
+  },
+  {
+    "slug": "07-conditional-addition",
+    "title": "Conditional addition",
+    "hideDomain": true
+  },
+  {
+    "slug": "08-if-else-start",
+    "title": "Conditional start",
+    "hideDomain": true
+  }
+]

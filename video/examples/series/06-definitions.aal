@@ -1,0 +1,6 @@
+fn f(x)
+    define shifted x+3
+    = shifted
+    ^= 2
+    += shifted
+end

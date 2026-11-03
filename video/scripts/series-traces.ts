@@ -1,0 +1,34 @@
+import {readFileSync, writeFileSync, mkdirSync} from 'node:fs';
+import {compile, evaluateFunction, latex} from '../../src/compiler/compiler';
+import {trace} from '../../src/compiler/trace';
+import {renderedEquation} from './math-svg';
+const manifest = JSON.parse(readFileSync('video/examples/series/manifest.json', 'utf8')) as {slug: string; title: string; hideDomain: boolean}[];
+const checks = [
+  [{x: 2}, 10], [{x: 2}, 12], [{x: 2, y: 6}, 4], [{n: 4}, 10],
+  [{x: 1}, Math.sin(4)], [{x: 2}, 30], [{x: -2}, -2], [{x: -2}, 2],
+] as [Record<string, number>, number][];
+mkdirSync('video/src/series', {recursive: true});
+const templateMeta = readFileSync('video/src/project.meta', 'utf8');
+for (const [index, item] of manifest.entries()) {
+  const source = readFileSync(`video/examples/series/${item.slug}.aal`, 'utf8');
+  const compiled = compile(source);
+  const construction = trace(source);
+  const signature = `${compiled.name}(${compiled.params.join(',')})`;
+  const steps = construction.steps.filter(step => step.kind !== 'simplify').map(step => ({...step,
+    ...renderedEquation(`${signature}=${step.afterLatex}`)}));
+  const last = steps.at(-1)!;
+  steps.push({...last, kind: 'simplify', line: source.trimEnd().split('\n').length,
+    endLine: source.trimEnd().split('\n').length, source: 'end', title: 'Finish',
+    before: last.after, beforeLatex: last.afterLatex, after: compiled.simplified, afterLatex: compiled.expressionLatex,
+    ...renderedEquation(`${signature}=${compiled.expressionLatex}`)});
+  const [inputs, expected] = checks[index];
+  if (Math.abs(evaluateFunction(compiled, inputs) - expected) > 1e-10) throw new Error(`Failed ${item.slug}`);
+  if (index === 6 && evaluateFunction(compiled, {x: 2}) !== 5) throw new Error('True conditional branch failed');
+  if (index === 7 && (evaluateFunction(compiled, {x: 2}) !== 4 || evaluateFunction(compiled, {x: 0}) !== 0)) throw new Error('Conditional start boundary failed');
+  writeFileSync(`video/src/series/${item.slug}.json`, JSON.stringify({...construction, steps,
+    tutorialTitle: true, hideDomain: item.hideDomain, showCaptions: false,
+    timing: {line: 0.5, intro: 0.4, outro: 2}}, null, 2) + '\n');
+  writeFileSync(`video/src/series/${item.slug}.tsx`, `import {createWalkthrough} from '../scenes/walkthrough';\nimport trace from './${item.slug}.json';\nexport default createWalkthrough(trace);\n`);
+}
+writeFileSync('video/src/tutorial-series.ts', `import {makeProject} from '@motion-canvas/core';\n${manifest.map((item, i) => `import clip${i} from './series/${item.slug}?scene';`).join('\n')}\nexport default makeProject({scenes: [${manifest.map((_, i) => `clip${i}`).join(', ')}]});\n`);
+console.log(`Generated ${manifest.length} ordered tutorials; all numerical checks passed`);

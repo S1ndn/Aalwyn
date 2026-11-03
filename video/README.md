@@ -143,3 +143,18 @@ Five numerical inputs include the boundary x=0. The formula has no piecewise nod
 The reveal uses a plain Aalwyn title. During the reading pause, the original
 decision pseudocode and the highlighted Aalwyn source appear side by side with
 labels, with the original compiled expression below.
+
+## Ordered standalone tutorial series
+
+Run `npm run video:series`, then select **src/tutorial-series**. Regenerate and
+check it with `npm run video:series:build`. The eight examples progress through
+untyped arithmetic and polynomials, real and integer inputs, `>>` calls,
+`define`, guarded addition, and an if/else starting assignment. Every clip opens
+and closes on #141619 and introduces its expression with “How to write” and
+“In Aalwyn”. Early examples omit type annotations and the domain display.
+Definition steps show the defined value below the current function.
+
+Render the reel, then run `python video/scripts/export-series.py` to split it
+into numbered clips with matching source files. The splitter finds the blank
+background pauses and verifies that each exported clip starts and ends on a
+flat background. Files appear in `video/output/tutorial-clips/`.

@@ -18,7 +18,9 @@
     "video:prime-log": "tsx video/scripts/prime-log-trace.ts && npm --prefix video start",
     "video:prime-log:build": "tsx video/scripts/prime-log-trace.ts && npm --prefix video run build",
     "video:opening": "tsx video/scripts/opening-assets.ts && npm --prefix video start",
-    "video:opening:build": "tsx video/scripts/opening-assets.ts && npm --prefix video run build"
+    "video:opening:build": "tsx video/scripts/opening-assets.ts && npm --prefix video run build",
+    "video:series": "tsx video/scripts/series-traces.ts && npm --prefix video start",
+    "video:series:build": "tsx video/scripts/series-traces.ts && npm --prefix video run build"
   },
   "dependencies": {
     "@codemirror/autocomplete": "^6.20.4",

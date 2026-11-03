@@ -1,0 +1,10 @@
+import {makeProject} from '@motion-canvas/core';
+import clip0 from './series/01-arithmetic?scene';
+import clip1 from './series/02-polynomial?scene';
+import clip2 from './series/03-real-inputs?scene';
+import clip3 from './series/04-integer-input?scene';
+import clip4 from './series/05-function-calls?scene';
+import clip5 from './series/06-definitions?scene';
+import clip6 from './series/07-conditional-addition?scene';
+import clip7 from './series/08-if-else-start?scene';
+export default makeProject({scenes: [clip0, clip1, clip2, clip3, clip4, clip5, clip6, clip7]});

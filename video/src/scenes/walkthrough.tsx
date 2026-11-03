@@ -6,7 +6,7 @@ import type {TraceStep} from '../../../src/compiler/trace';
 export interface WalkthroughData {
   name: string; params: string[]; source: string; domainLatex: string; finalLatex: string;
   steps: unknown[]; timing?: {line: number; intro: number; outro: number};
-  showCaptions?: boolean; skipFormulaIntro?: boolean;
+  showCaptions?: boolean; skipFormulaIntro?: boolean; tutorialTitle?: boolean; hideDomain?: boolean;
 }
 
 export function createWalkthrough(trace: WalkthroughData) {
@@ -100,17 +100,27 @@ return makeScene2D(function* (view) {
   </Node>);
   formula().scale(() => Math.min(1, 730 / Math.max(1, formula().width()), 300 / Math.max(1, formula().height())));
   let displayedFormula: Latex | Img = formula();
+  if (trace.tutorialTitle) yield* waitFor(0.4);
   if (!trace.skipFormulaIntro) {
   const finalStep = steps.at(-1)!;
   const intro = finalStep.mathSvg
     ? new Img({src: finalStep.mathSvg, size: finalStep.mathSize!, opacity: 0})
     : new Latex({tex: equation(trace.finalLatex), fontSize: 64, fill: foreground, opacity: 0});
+  const introTitles = new Node({opacity: 0});
+  if (trace.tutorialTitle) {
+    introTitles.add(<>
+      <Txt text="How to write" y={-240} fontSize={60} fill={foreground}/>
+      <Txt text="In Aalwyn" y={210} fontSize={52} fontWeight={500} fill={accent}/>
+    </>);
+    view.add(introTitles);
+  }
   view.add(intro);
   intro.scale(() => Math.min(1.7, 1400 / Math.max(1, intro.width()), 550 / Math.max(1, intro.height())));
-  yield* intro.opacity(1, 0.55);
+  yield* all(intro.opacity(1, 0.55), introTitles.opacity(1, 0.55));
   yield* waitFor(2);
-  yield* all(intro.opacity(0, 0.6), section().opacity(1, 0.6));
+  yield* all(intro.opacity(0, 0.6), introTitles.opacity(0, 0.6), section().opacity(1, 0.6));
   intro.remove();
+  introTitles.remove();
   } else {
     yield* section().opacity(1, 0.6);
   }
@@ -121,7 +131,7 @@ return makeScene2D(function* (view) {
   // The pause previews the implicit zero; the first instruction sets the declared start.
   activeLine().y(codeY + lineHeight / 2 + highlightOffsetY);
   code().selection(lines(0, 0));
-  yield* all(displayedFormula.opacity(1, 0.45), detail().opacity(1, 0.45), activeLine().opacity(1, 0.45));
+  yield* all(displayedFormula.opacity(1, 0.45), detail().opacity(trace.hideDomain ? 0 : 1, 0.45), activeLine().opacity(1, 0.45));
   yield* waitFor(1);
   for (const step of steps) {
     const isFinal = step.kind === 'simplify';
@@ -139,6 +149,8 @@ return makeScene2D(function* (view) {
         activeLine().position([-455, codeY + middle + highlightOffsetY], transition, easeInOutCubic),
         activeLine().height((step.endLine - step.line + 1) * lineHeight + 6, transition),
         code().selection(lines(step.line - 1, step.endLine - 1), transition),
+        detail().tex(step.definition ? String.raw`\mathrm{${step.definition.name}}=${step.definition.latex}` : trace.domainLatex || String.raw`\mathbb{R}`, transition),
+        detail().opacity(step.definition || !trace.hideDomain ? 1 : 0, transition),
       );
       displayedFormula.remove();
       displayedFormula = nextFormula;
