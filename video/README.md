@@ -104,3 +104,13 @@ when that count is zero and `0` otherwise, then the product passes through `ln`.
 Both conditional forms are present. Each intermediate formula comes from the
 compiler, with sum and product bodies kept inside their aggregation signs.
 The generator checks five inputs against independently specified prime products.
+
+## Caption-led prime opening
+
+Run `npm run video:opening` and select **src/prime-intro** in the editor.
+`npm run video:opening:build` regenerates the formula and checks the build.
+This separate 1080p/60 fps project animates the prime sequence, the “right?”
+reveal, Willans' formula, four checked input/output examples, and the
+“It's programming, with math!” payoff. It exports to `video/output/prime-intro.mp4`.
+The original walkthrough remains available as **src/project** on the project
+selection screen. Edit captions and pacing in `src/scenes/prime-intro.tsx`.
