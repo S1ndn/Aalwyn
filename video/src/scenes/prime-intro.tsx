@@ -240,10 +240,15 @@ export default makeScene2D(function* (view) {
   yield* waitFor(1.8);
   yield* introduction().opacity(0, 0.35);
   const logo = createRef<Img>();
-  view.add(<Img ref={logo} src="/aalwyn-logo.png" width={920} opacity={0}/>);
-  yield* logo().opacity(1, 0.5);
+  const logoName = createRef<Txt>();
+  view.add(<>
+    <Img ref={logo} src="/aalwyn-logo.png" width={680} y={-65} opacity={0}/>
+    <Txt ref={logoName} text="Aalwyn" y={100} fontSize={64}
+      fontWeight={500} fill={foreground} opacity={0}/>
+  </>);
+  yield* all(logo().opacity(1, 0.5), logoName().opacity(1, 0.5));
   yield* waitFor(1.6);
-  yield* logo().opacity(0, 0.4);
+  yield* all(logo().opacity(0, 0.4), logoName().opacity(0, 0.4));
   const review = createRef<Node>();
   view.add(<Node ref={review} opacity={0}>
     <Txt text="Here’s the same decision in Aalwyn." y={-300} fontSize={60} fill={foreground}/>
