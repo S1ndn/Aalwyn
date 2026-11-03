@@ -158,3 +158,8 @@ Render the reel, then run `python video/scripts/export-series.py` to split it
 into numbered clips with matching source files. The splitter finds the blank
 background pauses and verifies that each exported clip starts and ends on a
 flat background. Files appear in `video/output/tutorial-clips/`.
+
+The tutorial series uses raw lowered LaTeX for every construction step, the
+opening expression, definition values, and the final frame. It does not run a
+presentation simplification/factorization step or reorder the finished expression.
+Both raw and simplified evaluator results are checked against the expected values.

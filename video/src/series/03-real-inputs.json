@@ -110,7 +110,7 @@
       ]
     },
     {
-      "kind": "simplify",
+      "kind": "update",
       "line": 4,
       "endLine": 4,
       "source": "end",
@@ -165,7 +165,7 @@
     }
   ],
   "finalLatex": "\\frac{x + y}{2}",
-  "latex": "\\begin{gathered}f\\left(x, y\\right) = \\frac{x + y}{2}\\\\ \\text{for } x \\in \\mathbb{R} \\land y \\in \\mathbb{R}\\end{gathered}",
+  "latex": "f(x,y)=\\frac{x + y}{2}",
   "tutorialTitle": true,
   "hideDomain": false,
   "showCaptions": false,
